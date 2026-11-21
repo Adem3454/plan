@@ -65,7 +65,7 @@ function edit(id){const p=plans.find(x=>x.id==id);
 const b64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 async function push(){try{const reg=await navigator.serviceWorker.ready;if(await Notification.requestPermission()!='granted')return alert('Bildirim izni verilmedi.');
  const s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(CFG.vapid)});
- const {error}=await sb.from('push_subs').upsert({endpoint:s.endpoint,sub:s.toJSON()},{onConflict:'endpoint'});alert(error?error.message:'Bildirimler açık.');close()}catch(e){alert(e.message)}}
+ const {error}=await sb.from('push_subs').upsert({endpoint:s.endpoint,sub:s.toJSON(),email:(user.email||'').toLowerCase()},{onConflict:'endpoint'});alert(error?error.message:'Bildirimler açık.');close()}catch(e){alert(e.message)}}
 async function act(a,i){const p=i&&plans.find(x=>x.id==i);
  if(a=='out')zoom(-1);else if(a=='prev')shift(-1);else if(a=='next')shift(1);else if(a=='today'){V.d=new Date();render()}
  else if(a=='set')sheet(`<p class="hint">${esc(user.email)}</p><div class="card"><button class="row" data-a="push">Bildirimleri aç</button><button class="row red" data-a="logout">Çıkış yap</button></div>`);
