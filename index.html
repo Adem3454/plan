@@ -94,6 +94,8 @@ body{font-size:15px}h1{font-size:26px;margin:6px 0 10px}h1 small{font-size:16px}
 .si span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.si small{font-size:11px}
 .card textarea{display:block;width:100%;min-height:150px;border:0;padding:12px 14px;font:16px/1.4 inherit;background:var(--card);color:var(--l);resize:vertical}
 html{overflow-x:hidden}#app{min-width:0}.ph,.seg{max-width:100%}
+@media(min-width:700px){.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;overflow:visible;margin:0;padding:0 0 16px}.col{flex:none;min-width:0}}
+.sortable-fallback{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 </style></head><body>
 <div id="app"></div>
 <div id="bar"><form id="qf"><input id="q" placeholder="yarın 15:00 diş hekimi" enterkeyhint="done" autocomplete="off"><button aria-label="Ekle">+</button></form></div>
