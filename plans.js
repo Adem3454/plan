@@ -26,8 +26,8 @@ const card=(t,p)=>{const sc=SB.filter(s=>s.task_id==t.id),dn=sc.filter(s=>s.done
  return `<div class="tk${t.status=='done'?' done':''}" data-t="${t.id}"><span class="ck"${can(t,p)?` data-tk="${t.id}"`:''}></span><div class="tt">${esc(t.title)}<small>${[V2=='pano'&&t.assignee?esc(nm(p,t.assignee)):'',sc.length?dn+'/'+sc.length+' alt görev':''].filter(Boolean).join(' · ')}</small></div></div>`};
 function planRender(p){const ts=TK.filter(t=>t.project_id==p.id).sort((a,b)=>a.pos-b.pos),pc=Math.round(avg(ts)*100),dn=ts.filter(t=>t.status=='done').length;
  const cols=V2=='kisi'?[['','Atanmamış'],...mem(p).map(m=>[m.email,m.name])]:[['todo','Yapılacak'],['doing','Sürüyor'],['done','Bitti']];
- $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button></span><span><button data-pa="pset">${own(p)?'Kişiler ⋯':'Kişiler'}</button></span></nav><div class="ph" style="--c:${p.color}"><h1>${esc(p.name)}</h1><div class="pb"><i style="width:${pc}%"></i></div><small>${dn}/${ts.length} görev tamam · %${pc} · ${mem(p).length} kişi${left(p)}${own(p)?'':' · sadece kendi görevlerini düzenleyebilirsin'}</small></div><div class="seg"><button data-vw="pano" class="${V2=='pano'?'on':''}">Pano</button><button data-vw="kisi" class="${V2=='kisi'?'on':''}">Kişiler</button></div><div class="cols">${cols.map(([c,n])=>{const a=ts.filter(t=>V2=='kisi'?(c===''?!mem(p).some(m=>m.email==t.assignee):t.assignee==c):t.status==c),k=V2=='kisi'&&a.length;
-  return `<div class="col"><h3>${esc(n)}<small>${k?Math.round(avg(a)*100)+'%':a.length}</small></h3>${k?`<div class="pb"><i style="width:${avg(a)*100}%"></i></div>`:''}<div class="list" data-c="${esc(c)}">${a.map(t=>card(t,p)).join('')}</div></div>`}).join('')}</div>`;
+ $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button></span><span><button data-pa="pset">${own(p)?'Kişiler ⋯':'Kişiler'}</button></span></nav><div class="ph" style="--c:${p.color}"><div><h1>${esc(p.name)}</h1><small>${dn}/${ts.length} görev tamam · %${pc} · ${mem(p).length} kişi${left(p)}${own(p)?'':' · sadece kendi görevlerini düzenleyebilirsin'}</small></div><span class="rg" style="--p:${pc}"><b>${pc}%</b></span></div><div class="seg"><button data-vw="pano" class="${V2=='pano'?'on':''}">Pano</button><button data-vw="kisi" class="${V2=='kisi'?'on':''}">Kişiler</button></div><div class="cols">${cols.map(([c,n])=>{const a=ts.filter(t=>V2=='kisi'?(c===''?!mem(p).some(m=>m.email==t.assignee):t.assignee==c):t.status==c),k=V2=='kisi'&&a.length;
+  return `<div class="col"><h3>${V2=='kisi'&&c!==''?`<span class="rg" style="--p:${a.length?Math.round(avg(a)*100):0}"><b>${esc(n[0].toLocaleUpperCase(TR))}</b></span>`:''}<span class="nm">${esc(n)}</span><small>${V2=='kisi'&&a.length?a.filter(t=>t.status=='done').length+'/'+a.length:a.length}</small></h3><div class="list" data-c="${esc(c)}">${a.map(t=>card(t,p)).join('')}</div></div>`}).join('')}</div>`;
  document.querySelectorAll('.list').forEach(el=>new Sortable(el,{group:'t',animation:220,delay:150,delayOnTouchOnly:true,ghostClass:'gh',forceFallback:true,fallbackTolerance:4,disabled:!own(p),onEnd:dropped}))}
 function dropped(e){const c=e.to.dataset.c,t=TK.find(x=>x.id==e.item.dataset.t),ch=new Set();
  if(V2=='kisi')t.assignee=c||null;else t.status=c;
@@ -43,7 +43,7 @@ const sub=(id,fn)=>{fn();sync(SB.find(s=>s.id==id)?.task_id||ET);cacheP();editT(
 function editT(id){ET=id;const t=TK.find(x=>x.id==id),p=cur(),o=own(p),c=can(t,p),ss=SB.filter(s=>s.task_id==id).sort((a,b)=>a.pos-b.pos);
  sheet(`<div class="card">${o?`<input id="tt" value="${esc(t.title)}">`:`<div class="row">${esc(t.title)}</div>`}</div>${o?`<div class="card"><select id="ta"><option value="">Atanmamış</option>${mem(p).map(m=>`<option value="${esc(m.email)}"${m.email==t.assignee?' selected':''}>${esc(m.name)}</option>`).join('')}</select></div>`:`<p class="hint">Atanan: ${esc(t.assignee?nm(p,t.assignee):'—')}${c?'':' · sadece görebilirsin'}</p>`}<h2>Alt görevler</h2><div class="card">${ss.map(s=>`<div class="p${s.done?' done':''}"><span class="ck"${c?` data-sk="${s.id}"`:''}></span><div class="tt">${esc(s.title)}</div>${c?`<button data-pa="ds" data-i="${s.id}">✕</button>`:''}</div>`).join('')||'<div class="row"><small>Henüz yok</small></div>'}${c?'<input id="ns" placeholder="Alt görev ekle, Enter" enterkeyhint="done">':''}</div>${o?`<div class="seg">${[['todo','Yapılacak'],['doing','Sürüyor'],['done','Bitti']].map(([k,n])=>`<button data-s="${k}" class="${t.status==k?'on':''}">${n}</button>`).join('')}</div><div class="card"><button class="row red" data-pa="dt" data-i="${id}">Görevi sil</button></div><button class="big" data-pa="st" data-i="${id}">Kaydet</button>`:''}`)}
 function newPlan(){sheet(`<div class="card"><input id="pn" placeholder="Plan adı"></div><div class="seg">${Object.keys(TPL).map((k,i)=>`<button data-tp="${k}" class="${i?'':'on'}">${k}</button>`).join('')}</div><button class="big" data-pa="mk">Oluştur</button>`)}
-function kisiler(){const p=cur(),o=own(p);sheet(`<h2>Kişiler</h2><div class="card">${mem(p).map(m=>`<div class="p"><div class="tt">${esc(m.name)}<small>${esc(m.email.endsWith('@bekliyor.local')?'davet bekliyor':m.email)}${m.role=='owner'?' · yönetici':''}</small></div>${o&&m.role!='owner'?`<button data-pa="lk" data-i="${m.id}">Bağlantı</button><button data-pa="rm" data-i="${m.id}">✕</button>`:''}</div>`).join('')}</div>${o?`<h2>Davet et</h2><div class="card"><input id="in" placeholder="Ad (ör. Yunus)"><input id="ie" type="email" placeholder="E-posta (isteğe bağlı)"></div><button class="big" data-pa="am">Davet bağlantısı oluştur</button><h2>Teslim tarihi</h2><div class="card"><input id="pd" type="date" value="${p.due||''}"></div><button class="big" data-pa="sd">Tarihi kaydet</button><div class="card" style="margin-top:16px"><button class="row" data-pa="imp">Yapıştırarak içe aktar (Gemini vb.)</button></div><div class="card"><button class="row red" data-pa="dp">Planı sil</button></div>`:''}`)}
+function kisiler(){const p=cur(),o=own(p);sheet(`${MSG?`<p class="hint">${esc(MSG)}</p>`:''}<h2>Kişiler</h2><div class="card">${mem(p).map(m=>`<div class="p"><div class="tt">${esc(m.name)}<small>${esc(m.email.endsWith('@bekliyor.local')?'davet bekliyor':m.email)}${m.role=='owner'?' · yönetici':''}</small></div>${o&&m.role!='owner'?`<button data-pa="rm" data-i="${m.id}">✕</button>`:''}</div>`).join('')}</div>${o?`<h2>Kişi ekle</h2><div class="card"><input id="in" placeholder="Ad yaz (ör. yun) ya da e-posta" autocomplete="off"><div id="sg"></div></div><button class="big" data-pa="am">E-postayla ekle</button><h2>Teslim tarihi</h2><div class="card"><input id="pd" type="date" value="${p.due||''}"></div><button class="big" data-pa="sd">Tarihi kaydet</button><div class="card" style="margin-top:16px"><button class="row" data-pa="imp">Yapıştırarak içe aktar (Gemini vb.)</button></div><div class="card"><button class="row red" data-pa="dp">Planı sil</button></div>`:''}`)}
 async function pact(a,i){const p=cur();
  if(a=='menu')document.body.classList.add('sd');
  else if(a=='np'){document.body.classList.remove('sd');newPlan()}
@@ -110,8 +110,9 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLower
 document.addEventListener('click',e=>{const x=e.target.closest('[data-pk]');if(x)goPK(+x.dataset.pk)});
 const _pa=pact;
 pact=async function(a,i){const p=cur();
- if(a=='am'){const id=crypto.randomUUID(),n=$('#in').value.trim(),e=$('#ie').value.trim().toLowerCase()||`davet-${id}@bekliyor.local`;if(!n&&e.endsWith('@bekliyor.local'))return alert('Ad veya e-posta yaz.');
+ if(a=='am_old'){const id=crypto.randomUUID(),n=$('#in').value.trim(),e=$('#ie').value.trim().toLowerCase()||`davet-${id}@bekliyor.local`;if(!n&&e.endsWith('@bekliyor.local'))return alert('Ad veya e-posta yaz.');
   MB.push({id,project_id:P,email:e,name:n||e.split('@')[0],role:'member'});cacheP();share(id);sb.from('project_members').insert({id,project_id:P,email:e,name:n||e.split('@')[0]}).then(r=>{err(r);kisiler();render()})}
+ else if(a=='am')addFromInput()
  else if(a=='lk')share(i)
  else if(a=='sd'){p.due=$('#pd').value||null;cacheP();close();render();sb.from('projects').update({due:p.due}).eq('id',p.id).then(err)}
  else if(a=='imp')impSheet()
@@ -119,3 +120,19 @@ pact=async function(a,i){const p=cur();
  else if(a=='ii')await doImp()
  else if(a=='ck')palette()
  else return _pa(a,i)};
+
+/* ---- kişi ekleme: otomatik tamamlama, bağlantısız ---- */
+let SU=[],sut=null,MSG='';
+async function addMem(e,n){const p=cur();if(mem(p).some(m=>m.email==e))return alert('Bu kişi zaten planda.');
+ const m={id:crypto.randomUUID(),project_id:p.id,email:e,name:n};MB.push({...m,role:'member'});cacheP();render();
+ const r=await sb.from('project_members').insert(m);
+ if(r.error){MB=MB.filter(x=>x.id!=m.id);cacheP();render();return alert(r.error.message)}
+ const f=await sb.rpc('find_users',{q:e});
+ MSG=f.data&&f.data.some(u=>u.email==e)?`${n} eklendi, plan hesabında göründü.`:`${n} eklendi. Bu e-postayla henüz hesap yok, hesap açınca plan kendiliğinden gelir.`;
+ kisiler();MSG='';render()}
+function addFromInput(){const raw=$('#in').value.trim().toLowerCase();if(!raw.includes('@'))return alert('Listeden bir kişi seç ya da tam e-posta yaz.');addMem(raw,raw.split('@')[0])}
+document.addEventListener('input',e=>{if(e.target.id!='in')return;clearTimeout(sut);const q=e.target.value.trim();
+ if(q.length<2){$('#sg').innerHTML='';return}
+ sut=setTimeout(async()=>{const r=await sb.rpc('find_users',{q});SU=(r.data||[]).filter(u=>!mem(cur()).some(m=>m.email==u.email));
+  $('#sg').innerHTML=SU.map((u,i)=>`<button class="row" data-su="${i}">${esc(u.name)} <small>${esc(u.email)}</small></button>`).join('')||'<div class="row"><small>Kayıtlı kullanıcı bulunamadı. Tam e-posta yazıp Ekle\'ye basabilirsin.</small></div>'},250)});
+document.addEventListener('click',e=>{const x=e.target.closest('[data-su]');if(x)addMem(SU[+x.dataset.su].email,SU[+x.dataset.su].name)});

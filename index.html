@@ -96,6 +96,13 @@ body{font-size:15px}h1{font-size:26px;margin:6px 0 10px}h1 small{font-size:16px}
 html{overflow-x:hidden}#app{min-width:0}.ph,.seg{max-width:100%}
 @media(min-width:700px){.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;overflow:visible;margin:0;padding:0 0 16px}.col{flex:none;min-width:0}}
 .sortable-fallback{opacity:.9;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.rg{--s:32px;width:var(--s);height:var(--s);border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),rgba(120,120,128,.28) 0);display:grid;place-items:center;position:relative;flex:none}
+.rg::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--bg)}
+.rg b{position:relative;font-size:12px}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.ph .rg{--s:64px;background:conic-gradient(#fff calc(var(--p)*1%),rgba(255,255,255,.3) 0)}
+.ph .rg::before{inset:5px;background:rgba(0,0,0,.28)}.ph .rg b{font-size:15px}
+.col h3{justify-content:flex-start;align-items:center;gap:8px}.nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style></head><body>
 <div id="app"></div>
 <div id="bar"><form id="qf"><input id="q" placeholder="yarın 15:00 diş hekimi" enterkeyhint="done" autocomplete="off"><button aria-label="Ekle">+</button></form></div>
