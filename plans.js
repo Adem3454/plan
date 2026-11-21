@@ -19,14 +19,14 @@ const _render=render;
 render=function(d){const p=cur();$('#q').placeholder=P=='cal'?'yarın 15:00 diş hekimi':'Görev ekle · @ali pastayı al';
  if(P!='cal'&&!p)P='cal';drawSide();$('#bar').style.display=(p&&!own(p))?'none':'';
  if(P=='cal')return _render(d);
- planRender(p);if(d)$('#app').animate([{opacity:0,transform:'translateY(14px) scale(.97)'},{opacity:1,transform:'none'}],{duration:480,easing:'cubic-bezier(.32,.72,0,1)'})};
+ try{planRender(p)}catch(er){$('#app').innerHTML='<p class="hint">Plan açılamadı: '+esc(er.message)+'</p>';console.error(er)}if(d)$('#app').animate([{opacity:0,transform:'translateY(14px) scale(.97)'},{opacity:1,transform:'none'}],{duration:480,easing:'cubic-bezier(.32,.72,0,1)'})};
 
 function drawSide(){$('#side').innerHTML=`<h2>Planlar</h2><button class="si" data-pa="ck">⌕ Ara · Ctrl+K</button><button class="si${P=='cal'?' on':''}" data-pg="cal"><i style="background:var(--ac)"></i>Takvim</button>${PJ.map(p=>`<button class="si${P==p.id?' on':''}" data-pg="${p.id}"><i style="background:${p.color}"></i><span>${esc(p.name)}${own(p)?'':'<small> · paylaşılan</small>'}</span></button>`).join('')}<button class="si" data-pa="np" style="color:var(--ac)">+ Yeni plan</button>`}
 const card=(t,p)=>{const sc=SB.filter(s=>s.task_id==t.id),dn=sc.filter(s=>s.done).length;
  return `<div class="tk${t.status=='done'?' done':''}" data-t="${t.id}"><span class="ck"${can(t,p)?` data-tk="${t.id}"`:''}></span><div class="tt">${esc(t.title)}<small>${[V2=='pano'&&t.assignee?esc(nm(p,t.assignee)):'',sc.length?dn+'/'+sc.length+' alt görev':''].filter(Boolean).join(' · ')}</small></div></div>`};
 function planRender(p){const ts=TK.filter(t=>t.project_id==p.id).sort((a,b)=>a.pos-b.pos),pc=Math.round(avg(ts)*100),dn=ts.filter(t=>t.status=='done').length;
  const cols=V2=='kisi'?[['','Atanmamış'],...mem(p).map(m=>[m.email,m.name])]:[['todo','Yapılacak'],['doing','Sürüyor'],['done','Bitti']];
- $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button></span><span><button data-pa="pset">${own(p)?'Kişiler ⋯':'Kişiler'}</button></span></nav><div class="ph" style="--c:${p.color}"><h1>${esc(p.name)}</h1><div class="pb"><i style="width:${pc}%"></i></div><small>${dn}/${ts.length} görev tamam · %${pc} · ${mem(p).length} kişi${left(p)}${own(p)?'':' · sadece kendi görevlerini düzenleyebilirsin'}</small></div><div class="seg"><button data-vw="pano" class="${V2=='pano'?'on':''}">Pano</button><button data-vw="kisi" class="${V2=='kisi'?'on':''}">Kişiler</button></div><div class="cols">${cols.map(([c,n])=>{const a=ts.filter(t=>V2=='kisi'?(t.assignee||'')==c:t.status==c),k=V2=='kisi'&&a.length;
+ $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button></span><span><button data-pa="pset">${own(p)?'Kişiler ⋯':'Kişiler'}</button></span></nav><div class="ph" style="--c:${p.color}"><h1>${esc(p.name)}</h1><div class="pb"><i style="width:${pc}%"></i></div><small>${dn}/${ts.length} görev tamam · %${pc} · ${mem(p).length} kişi${left(p)}${own(p)?'':' · sadece kendi görevlerini düzenleyebilirsin'}</small></div><div class="seg"><button data-vw="pano" class="${V2=='pano'?'on':''}">Pano</button><button data-vw="kisi" class="${V2=='kisi'?'on':''}">Kişiler</button></div><div class="cols">${cols.map(([c,n])=>{const a=ts.filter(t=>V2=='kisi'?(c===''?!mem(p).some(m=>m.email==t.assignee):t.assignee==c):t.status==c),k=V2=='kisi'&&a.length;
   return `<div class="col"><h3>${esc(n)}<small>${k?Math.round(avg(a)*100)+'%':a.length}</small></h3>${k?`<div class="pb"><i style="width:${avg(a)*100}%"></i></div>`:''}<div class="list" data-c="${esc(c)}">${a.map(t=>card(t,p)).join('')}</div></div>`}).join('')}</div>`;
  document.querySelectorAll('.list').forEach(el=>new Sortable(el,{group:'t',animation:220,delay:150,delayOnTouchOnly:true,ghostClass:'gh',disabled:!own(p),onEnd:dropped}))}
 function dropped(e){const c=e.to.dataset.c,t=TK.find(x=>x.id==e.item.dataset.t),ch=new Set();
@@ -69,7 +69,7 @@ document.addEventListener('click',e=>{const t=e.target;let x;
  if(x=t.closest('[data-pa]'))return pact(x.dataset.pa,x.dataset.i);
  if(x=t.closest('[data-pg]')){P=x.dataset.pg;document.body.classList.remove('sd');return render(1)}
  if(x=t.closest('[data-vw]')){V2=x.dataset.vw;return render()}
- if(x=t.closest('[data-t]'))return editT(x.dataset.t)});
+ if(x=t.closest('[data-t]')){try{editT(x.dataset.t)}catch(er){alert('Görev açılamadı: '+er.message)}}});
 $('#qf').onsubmit=e=>{e.preventDefault();const v=$('#q').value;$('#q').value='';P=='cal'?quick(v):addTask(v)};
 
 /* ---- davet bağlantısı, içe aktarma, arama, teslim tarihi ---- */
