@@ -38,7 +38,7 @@ function vDay(){const ds=ymd(V.d),t=TODAY(),n=byDay(ds);
  return h+(n.length?'':'<p class="hint">Bu gün boş. Aşağıdan plan ekle ya da dinlen.</p>')}
 
 function render(dir=0){const i=L.indexOf(V.l),par=['',String(V.d.getFullYear()),AY[V.d.getMonth()],'Hafta'][i];
- $('#app').innerHTML=`<nav><button data-a="out">${i?'‹ '+par:''}</button><span><button data-a="prev">‹</button><button data-a="today">Bugün</button><button data-a="next">›</button><button data-a="set">⋯</button></span></nav>`+[vYear,vMonth,vWeek,vDay][i]();
+ $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button><button data-a="out">${i?'‹ '+par:''}</button></span><span><button data-a="prev">‹</button><button data-a="today">Bugün</button><button data-a="next">›</button><button data-a="set">⋯</button></span></nav>`+[vYear,vMonth,vWeek,vDay][i]();
  if(dir)$('#app').animate([{opacity:0,transform:`scale(${dir>0?.9:1.1})`},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.2,.8,.2,1)'})}
 function zoom(dir){const i=L.indexOf(V.l)+dir;if(i<0||i>3)return;V.l=L[i];render(dir)}
 function go(g){const [l,ds]=g.split(':'),s=Math.sign(L.indexOf(l)-L.indexOf(V.l));V={l,d:dt(ds)};render(s||1)}
@@ -94,7 +94,7 @@ addEventListener('touchend',e=>{if(pd&&e.touches.length<2){const r=pl/pd;pd=0;if
 addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();if(Date.now()-wt<450)return;wt=Date.now();zoom(e.deltaY<0?1:-1)},{passive:false});
 addEventListener('keydown',e=>{if(!user||/INPUT/.test(document.activeElement.tagName))return;if(e.key=='ArrowLeft')shift(-1);if(e.key=='ArrowRight')shift(1)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user)load()});
-setInterval(()=>{if(user&&V.l=='day'&&!$('#sh').classList.contains('o'))render()},6e4);
+setInterval(()=>{if(user&&P=='cal'&&V.l=='day'&&!$('#sh').classList.contains('o'))render()},6e4);
 
 /* ---------- başlangıç ---------- */
 function login(){$('#bar').style.display='none';$('#app').innerHTML=`<h1 style="margin-top:18vh">Plan</h1><div class="card"><input id="em" type="email" placeholder="E-posta" autocomplete="email"><input id="pw" type="password" placeholder="Parola" autocomplete="current-password"></div><button class="big" data-a="in">Giriş yap</button><button class="ctr" data-a="up">Hesap oluştur</button>`}
