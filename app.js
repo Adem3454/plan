@@ -8,7 +8,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const cache=()=>localStorage.setItem('plans',JSON.stringify(plans));
 let sb,user,plans=[],V={l:'day',d:new Date()};
 
-const byDay=ds=>plans.filter(p=>p.day===ds).sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
+const byDay=ds=>plans.filter(p=>p.day===ds&&p.kind!='season'&&p.kind!='goal').sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
 const ld=ds=>byDay(ds).reduce((s,p)=>s+p.weight+1,0);
 
 /* ---------- görünümler ---------- */

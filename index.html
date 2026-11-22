@@ -103,6 +103,30 @@ html{overflow-x:hidden}#app{min-width:0}.ph,.seg{max-width:100%}
 .ph .rg{--s:64px;background:conic-gradient(#fff calc(var(--p)*1%),rgba(255,255,255,.3) 0)}
 .ph .rg::before{inset:5px;background:rgba(0,0,0,.28)}.ph .rg b{font-size:15px}
 .col h3{justify-content:flex-start;align-items:center;gap:8px}.nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row.on{font-weight:600;color:var(--ac)}
+#qf #mic{background:var(--card);color:var(--l);font-size:18px;padding:0 12px}
+.seg{flex-wrap:wrap}.card select+select{border-top:.5px solid var(--sep)}
+.wk7{position:relative;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:0 20px 12px}
+.wc{flex:0 0 min(78vw,230px);scroll-snap-align:center;background:var(--card);border-radius:12px;padding:8px}
+.wc.t{outline:2px solid var(--ac)}.wh{display:flex;gap:6px;cursor:pointer;font-size:13px}.wc .m{width:100%;margin:6px 0}
+.wl,.ln{min-height:60px}.pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 8px}
+.pc{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:7px 8px;margin-top:6px;font-size:13px;cursor:grab}
+.pc .tt small{display:block}.pc.done .tt{color:var(--l2);text-decoration:line-through}.pc.nt{border-left:3px solid var(--warn)}
+.dt{width:14px;height:14px;border-radius:50%;background:var(--sep);flex:none;cursor:pointer}.dt.doing{background:var(--ac)}.dt.done{background:var(--ok)}
+.nx{padding:0 4px;color:var(--l2);font-size:15px}
+.lanes{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -20px;padding:0 20px 12px}
+.ln-w{flex:0 0 min(80vw,300px);scroll-snap-align:start;background:var(--card);border-radius:12px;padding:10px}
+.ln-w h3{margin:0 0 4px;font-size:14px;display:flex;justify-content:space-between}
+.strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{background:rgba(0,122,255,.14);color:var(--ac);border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer}.chip.done{opacity:.4;text-decoration:line-through}
+#dock{max-width:760px;margin:0 auto 8px;display:none;gap:8px;overflow-x:auto}
+.tile{flex:none;width:60px;padding:6px 0;border-radius:12px;background:var(--card);border:.5px solid var(--sep);color:var(--l);font-size:20px;text-align:center}
+.tile small{display:block;font-size:11px;color:var(--l2)}
+@media(min-width:1000px){.wk7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));overflow:visible;margin:0;padding:0 0 12px}.wc{flex:none;min-width:0}.lanes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;margin:0;padding:0}.ln-w{flex:none}}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tl{padding:14px 0;border-radius:14px;background:var(--card);border:.5px solid var(--sep);color:var(--l);font-size:26px}
+.tl small{display:block;font-size:12px;color:var(--l2)}
+#qf #pl{background:var(--card);color:var(--ac);font-size:22px;padding:0 12px}
 </style></head><body>
 <div id="app"></div>
 <div id="bar"><form id="qf"><input id="q" placeholder="yarın 15:00 diş hekimi" enterkeyhint="done" autocomplete="off"><button aria-label="Ekle">+</button></form></div>
