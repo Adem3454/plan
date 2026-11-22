@@ -30,7 +30,7 @@ function planRender(p){const ts=TK.filter(t=>t.project_id==p.id).sort((a,b)=>a.p
  const cols=V2=='kisi'?[['','Atanmamış'],...mem(p).map(m=>[m.email,m.name])]:[['todo','Yapılacak'],['doing','Sürüyor'],['done','Bitti']];
  $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button></span><span><button data-pa="pset">${own(p)?'Kişiler ⋯':'Kişiler'}</button></span></nav><div class="ph" style="--c:${p.color}"><div><h1>${esc(p.name)}</h1><small>${dn}/${ts.length} görev tamam · %${pc} · ${mem(p).length} kişi${left(p)}${own(p)?'':' · sadece kendi görevlerini düzenleyebilirsin'}</small></div><span class="rg" style="--p:${pc}"><b>${pc}%</b></span></div><div class="seg"><button data-vw="pano" class="${V2=='pano'?'on':''}">Pano</button><button data-vw="kisi" class="${V2=='kisi'?'on':''}">Kişiler</button></div><div class="cols">${cols.map(([c,n])=>{const a=ts.filter(t=>V2=='kisi'?(c===''?!mem(p).some(m=>m.email==t.assignee):t.assignee==c):t.status==c),k=V2=='kisi'&&a.length;
   return `<div class="col"><h3>${V2=='kisi'&&c!==''?`<span class="rg" style="--p:${a.length?Math.round(avg(a)*100):0}"><b>${esc(n[0].toLocaleUpperCase(TR))}</b></span>`:''}<span class="nm">${esc(n)}</span><small>${V2=='kisi'&&a.length?a.filter(t=>t.status=='done').length+'/'+a.length:a.length}</small></h3><div class="list" data-c="${esc(c)}">${a.map(t=>card(t,p)).join('')}</div></div>`}).join('')}</div>`;
- document.querySelectorAll('.list').forEach(el=>new Sortable(el,{group:'t',animation:220,delay:150,delayOnTouchOnly:true,ghostClass:'gh',forceFallback:COARSE,fallbackOnBody:true,fallbackTolerance:4,emptyInsertThreshold:24,disabled:!own(p),onEnd:dropped}))}
+ }
 function dropped(e){const c=e.to.dataset.c,t=TK.find(x=>x.id==e.item.dataset.t),ch=new Set();
  if(V2=='kisi')t.assignee=c||null;else t.status=c;
  for(const l of new Set([e.to,e.from]))[...l.children].forEach((el,i)=>{const x=TK.find(y=>y.id==el.dataset.t);if(x){x.pos=i;ch.add(x)}});
@@ -71,7 +71,7 @@ document.addEventListener('click',e=>{const t=e.target;let x;
  if(x=t.closest('[data-pa]'))return pact(x.dataset.pa,x.dataset.i);
  if(x=t.closest('[data-pg]')){P=x.dataset.pg;document.body.classList.remove('sd');return render(1)}
  if(x=t.closest('[data-vw]')){V2=x.dataset.vw;return render()}
- if(x=t.closest('[data-t]')){try{editT(x.dataset.t)}catch(er){alert('Görev açılamadı: '+er.message)}}});
+ if((x=t.closest('[data-t]'))&&Date.now()-LD>300){try{editT(x.dataset.t)}catch(er){alert('Görev açılamadı: '+er.message)}}});
 $('#qf').onsubmit=e=>{e.preventDefault();const v=$('#q').value;$('#q').value='';P=='cal'?quick(v):addTask(v)};
 
 /* ---- davet bağlantısı, içe aktarma, arama, teslim tarihi ---- */
@@ -260,9 +260,9 @@ function cyc(id){const p=plans.find(x=>x.id==id),s={todo:'doing',doing:'done',do
  if(s=='doing'&&plans.filter(x=>x.day==p.day&&x.status=='doing'&&x.id!=p.id).length>=3&&!confirm('Yapılıyor şeridinde 3 iş var. Yine de eklensin mi?'))return;setStatus(p,s);save(p)}
 function nxt(id){const p=plans.find(x=>x.id==id);p.day=ymd(add(dt(p.day||TODAY()),1));if(stOf(p)=='doing')setStatus(p,'todo');save(p)}
 function afterCal(){const w=$('.wk7');if(w){const t=$('.wc.t');w.scrollLeft=WSL!=null?WSL:t?t.offsetLeft-(w.clientWidth-t.clientWidth)/2:0}
- document.querySelectorAll('.wl,.ln').forEach(el=>new Sortable(el,{group:'pl',animation:200,delay:150,delayOnTouchOnly:true,forceFallback:COARSE,fallbackOnBody:true,fallbackTolerance:4,emptyInsertThreshold:24,ghostClass:'gh',onAdd:tileAdd,onEnd:e=>dropPlan(e,el.classList.contains('ln')?'s':'w')}))}
+ }
 $('#bar').insertAdjacentHTML('afterbegin','<div id="dock"><button class="tile" data-tile="plan">🕒<small>Plan</small></button><button class="tile" data-tile="task">☑️<small>Görev</small></button><button class="tile" data-tile="note">📝<small>Not</small></button><button class="tile" data-tile="list">📋<small>Liste</small></button><button class="tile" data-tile="goal">🎯<small>Hedef</small></button><button class="tile" data-tile="season">🌤️<small>Dönem</small></button></div>');
-new Sortable($('#dock'),{group:{name:'pl',pull:'clone',put:false},sort:false,animation:150,delay:120,delayOnTouchOnly:true,forceFallback:COARSE,fallbackOnBody:true,fallbackTolerance:4,emptyInsertThreshold:24,onEnd:()=>{LD=Date.now()}});
+
 document.addEventListener('scroll',e=>{if(e.target.classList&&e.target.classList.contains('wk7'))WSL=e.target.scrollLeft},true);
 document.addEventListener('click',e=>{const t=e.target;let x;
  if(x=t.closest('[data-st]')){e.stopImmediatePropagation();cyc(x.dataset.st)}
@@ -304,7 +304,7 @@ $('#qf').insertAdjacentHTML('afterbegin','<button type="button" id="pl" aria-lab
 document.addEventListener('click',e=>{const t=e.target;let x;
  if(x=t.closest('[data-li]')){e.stopImmediatePropagation();lineOp(x.dataset.li,'t')}
  else if(x=t.closest('[data-ld]')){e.stopImmediatePropagation();lineOp(x.dataset.ld,'d')}
- else if(x=t.closest('[data-id]')){const p=plans.find(y=>y.id==x.dataset.id);if(p&&['list','goal','season'].includes(p.kind)){e.stopImmediatePropagation();listSheet(p.id)}}
+ else if((x=t.closest('[data-id]'))&&Date.now()-LD>300){const p=plans.find(y=>y.id==x.dataset.id);if(p&&['list','goal','season'].includes(p.kind)){e.stopImmediatePropagation();listSheet(p.id)}}
  else if(x=t.closest('[data-tp2]')){const k=x.dataset.tp2,v=$('#pi')?$('#pi').value:'';close();newItem(k,ymd(V.d),'todo',v)}
  else if(t.closest('#pl'))addPal()},true);
 document.addEventListener('keydown',e=>{const tg=document.activeElement.tagName;
@@ -319,3 +319,27 @@ pact=async function(a,i){
   if(!r.title)return;close();save(r)}
  else if(a=='pdl'){plans=plans.filter(x=>x.id!=i);cache();close();render();sb.from('plans').delete().eq('id',i).then(r=>r.error&&alert(r.error.message))}
  else return _pq(a,i)};
+
+/* ---- takvim için kendi sürükle-bırak (Sortable yerine) ---- */
+let DG=null;
+const zone=(x,y)=>{const el=document.elementFromPoint(x,y),c=el&&el.closest('.wc,.ln-w,.col');return c?c.querySelector('.wl,.ln,.list'):el&&el.closest('.pool')};
+function dgStart(c,x,y){const r=c.getBoundingClientRect(),g=c.cloneNode(true);g.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;margin:0;pointer-events:none;z-index:9999;opacity:.92;box-shadow:0 8px 24px rgba(0,0,0,.35)`;
+ document.body.appendChild(g);DG.g=g;DG.ox=x-r.left;DG.oy=y-r.top;DG.on=true;if(!DG.tile)c.classList.add('gh');document.body.classList.add('dragging')}
+function dgMove(x,y){DG.g.style.left=x-DG.ox+'px';DG.g.style.top=y-DG.oy+'px';
+ document.querySelectorAll('.over').forEach(e=>e.classList.remove('over'));const z=zone(x,y);if(z)z.classList.add('over');
+ const w=document.querySelector('.wk7,.lanes,.cols');if(w){const b=w.getBoundingClientRect();if(x>b.right-40)w.scrollLeft+=14;else if(x<b.left+40)w.scrollLeft-=14}
+ if(y<80)scrollBy(0,-12);else if(y>innerHeight-110)scrollBy(0,12)}
+function dgEnd(x,y,cancel){DG.g.remove();document.body.classList.remove('dragging');document.querySelectorAll('.over').forEach(e=>e.classList.remove('over'));
+ const c=DG.c,tile=DG.tile,z=!cancel&&zone(x,y);c.classList.remove('gh');DG=null;if(!z)return;
+ if(tile)return newItem(tile,z.dataset.d!==undefined?z.dataset.d:ymd(V.d),z.dataset.s||'todo');
+ const from=c.parentElement,nx=[...z.children].filter(k=>k!==c&&k.classList.contains(c.classList.contains('tk')?'tk':'pc')).find(k=>{const r=k.getBoundingClientRect();return y<r.top+r.height/2});
+ nx?z.insertBefore(c,nx):z.appendChild(c);c.classList.contains('tk')?dropped({item:c,to:z,from}):dropPlan({item:c,to:z,from},z.classList.contains('ln')?'s':'w')}
+document.addEventListener('pointerdown',e=>{if(e.pointerType=='mouse'&&e.button!==0)return;const c=e.target.closest('.pc,.tile[data-tile],.tk');if(!c||e.target.closest('[data-st],[data-nx],[data-tk]')||(c.classList.contains('tk')&&!own(cur())))return;
+ DG={c,tile:c.dataset.tile||null,x:e.clientX,y:e.clientY,on:false,touch:e.pointerType!='mouse',id:e.pointerId};
+ if(DG.touch)DG.t=setTimeout(()=>{if(DG&&!DG.on)dgStart(c,DG.x,DG.y)},180)});
+document.addEventListener('pointermove',e=>{if(!DG||e.pointerId!==DG.id)return;
+ if(!DG.on){if(Math.hypot(e.clientX-DG.x,e.clientY-DG.y)<=(DG.touch?10:5))return;if(DG.touch){clearTimeout(DG.t);DG=null;return}dgStart(DG.c,DG.x,DG.y)}
+ dgMove(e.clientX,e.clientY)});
+document.addEventListener('pointerup',e=>{if(!DG||e.pointerId!==DG.id)return;clearTimeout(DG.t);if(DG.on){LD=Date.now();dgEnd(e.clientX,e.clientY,false)}else DG=null});
+document.addEventListener('pointercancel',()=>{if(DG&&DG.on)dgEnd(0,0,true);else DG=null});
+document.addEventListener('touchmove',e=>{if(DG&&DG.on)e.preventDefault()},{passive:false});
