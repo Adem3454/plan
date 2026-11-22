@@ -39,7 +39,7 @@ function vDay(){const ds=ymd(V.d),t=TODAY(),n=byDay(ds);
 
 function render(dir=0){const i=L.indexOf(V.l),par=['',String(V.d.getFullYear()),AY[V.d.getMonth()],'Hafta'][i];
  $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button><button data-a="out">${i?'‹ '+par:''}</button></span><span><button data-a="prev">‹</button><button data-a="today">Bugün</button><button data-a="next">›</button><button data-a="set">⋯</button></span></nav>`+[vYear,vMonth,vWeek,vDay][i]();
- if(dir)$('#app').animate([{opacity:0,transform:`scale(${dir>0?.9:1.1})`},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.2,.8,.2,1)'})}
+ if(dir)$('#app').animate([{opacity:0,transform:`scale(${dir>0?.84:1.12})`},{opacity:1,transform:'none'}],{duration:520,easing:'cubic-bezier(.22,1.2,.36,1)'})}
 function zoom(dir){const i=L.indexOf(V.l)+dir;if(i<0||i>3)return;V.l=L[i];render(dir)}
 function go(g){const [l,ds]=g.split(':'),s=Math.sign(L.indexOf(l)-L.indexOf(V.l));V={l,d:dt(ds)};render(s||1)}
 function shift(n){const d=new Date(V.d),l=V.l;if(l=='year')d.setFullYear(d.getFullYear()+n);else if(l=='month'){d.setDate(1);d.setMonth(d.getMonth()+n)}else d.setDate(d.getDate()+n*(l=='week'?7:1));V.d=d;render()}
@@ -61,7 +61,7 @@ const tog=id=>{const p=plans.find(x=>x.id==id);save({...p,done:!p.done})};
 /* ---------- sayfalar (sheet) ---------- */
 const sheet=h=>{$('#sh').innerHTML=`<div>${h}</div>`;$('#sh').classList.add('o')},close=()=>$('#sh').classList.remove('o');
 function edit(id){const p=plans.find(x=>x.id==id);
- sheet(`<div class="card"><input id="et" value="${esc(p.title)}"><input id="ed" type="date" value="${p.day||''}"><input id="etm" type="time" value="${p.time||''}">${rmSel(p)}${rpSel(p)}</div><div class="seg">${['Hafif','Orta','Ağır'].map((x,i)=>`<button data-w="${i}" class="${p.weight==i?'on':''}">${x}</button>`).join('')}</div><div class="card"><button class="row" data-a="move" data-i="${id}">Bugüne al</button><button class="row red" data-a="del" data-i="${id}">Sil</button></div><button class="big" data-a="ok" data-i="${id}">Kaydet</button>`)}
+ sheet(`<div class="card"><input id="et" value="${esc(p.title)}"><input id="ed" type="date" value="${p.day||''}"><input id="etm" type="time" value="${p.time||''}">${rmSel(p)}${rpSel(p)}${iconSel(p)}</div><div class="seg">${['Hafif','Orta','Ağır'].map((x,i)=>`<button data-w="${i}" class="${p.weight==i?'on':''}">${x}</button>`).join('')}</div><div class="card"><button class="row" data-a="move" data-i="${id}">Bugüne al</button><button class="row red" data-a="del" data-i="${id}">Sil</button></div><button class="big" data-a="ok" data-i="${id}">Kaydet</button>`)}
 const b64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 async function push(){try{const reg=await navigator.serviceWorker.ready;if(await Notification.requestPermission()!='granted')return alert('Bildirim izni verilmedi.');
  const s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(CFG.vapid)});
@@ -73,7 +73,7 @@ async function act(a,i){const p=i&&plans.find(x=>x.id==i);
  else if(a=='logout'){await sb.auth.signOut();localStorage.clear();location.reload()}
  else if(a=='in'||a=='up'){const c={email:$('#em').value.trim(),password:$('#pw').value};const {data,error}=await(a=='in'?sb.auth.signInWithPassword(c):sb.auth.signUp(c));
   if(error)alert(error.message);else if(data.session)location.reload();else alert('E-postandaki bağlantıyla hesabı onayla, sonra giriş yap.')}
- else if(a=='ok')save({...p,title:$('#et').value.trim()||p.title,day:$('#ed').value||p.day,time:$('#etm').value||null,remind_min:+$('#erm').value,repeat:$('#erp').value||null,weight:+($('[data-w].on')?.dataset.w??p.weight)}),close();
+ else if(a=='ok')save({...p,title:$('#et').value.trim()||p.title,day:$('#ed').value||p.day,time:$('#etm').value||null,remind_min:+$('#erm').value,repeat:$('#erp').value||null,icon:$('#eic').value||null,weight:+($('[data-w].on')?.dataset.w??p.weight)}),close();
  else if(a=='move'){save({...p,day:TODAY()});close()}
  else if(a=='del'){softDel(i);close()}}
 
