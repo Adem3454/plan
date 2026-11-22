@@ -132,6 +132,13 @@ body:has(.sortable-chosen) .wk7,body:has(.sortable-chosen) .lanes,body:has(.sort
 body.dragging{user-select:none;cursor:grabbing}body.dragging .wk7,body.dragging .lanes{scroll-snap-type:none}
 .over{outline:2px dashed var(--ac);outline-offset:-2px;border-radius:10px}
 .tk{user-select:none;-webkit-user-select:none}
+.chip.on{background:var(--ac);color:#fff}.chip.hol{background:rgba(255,69,58,.15);color:var(--bad);cursor:default}
+.warn{border-left:4px solid var(--warn)}.dayhead{display:flex;align-items:center;gap:12px;margin-bottom:8px}.dayhead .rg{--s:48px}.dayhead .rg b{font-size:12px}
+.cele{animation:pop .8s ease 2}@keyframes pop{50%{transform:scale(1.25)}}
+.hours .hr{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start;border-top:.5px solid var(--sep);padding:6px 0;min-height:44px}.hl{width:46px;font-size:12px;color:var(--l2);flex:none;padding-top:8px}.hr .pc{flex:1;min-width:140px;margin-top:0}
+.donut{width:72px;height:72px;border-radius:50%;flex:none;position:relative}.donut::after{content:"";position:absolute;inset:16px;border-radius:50%;background:var(--card)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom));z-index:12;display:none}#toast button{background:#333;color:#fff;border-radius:20px;padding:8px 16px}
 </style></head><body>
 <div id="app"></div>
 <div id="bar"><form id="qf"><input id="q" placeholder="yarın 15:00 diş hekimi" enterkeyhint="done" autocomplete="off"><button aria-label="Ekle">+</button></form></div>

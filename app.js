@@ -45,10 +45,10 @@ function go(g){const [l,ds]=g.split(':'),s=Math.sign(L.indexOf(l)-L.indexOf(V.l)
 function shift(n){const d=new Date(V.d),l=V.l;if(l=='year')d.setFullYear(d.getFullYear()+n);else if(l=='month'){d.setDate(1);d.setMonth(d.getMonth()+n)}else d.setDate(d.getDate()+n*(l=='week'?7:1));V.d=d;render()}
 
 /* ---------- veri ---------- */
-const remind=p=>{if(p.done)return null;const t=new Date(p.day+'T'+(p.time||'09:00'));if(p.time)t.setMinutes(t.getMinutes()-15);return t>new Date()?t.toISOString():null};
+const remind=p=>{if(p.done)return null;const t=new Date(p.day+'T'+(p.time||'09:00'));if(p.remind_min===-1)return null;if(p.time)t.setMinutes(t.getMinutes()-(p.remind_min==null?15:p.remind_min));return t>new Date()?t.toISOString():null};
 async function save(p){p.remind_at=remind(p);p.notified=false;const i=plans.findIndex(x=>x.id==p.id);i<0?plans.push(p):plans[i]=p;cache();render();
- const {error}=await sb.from('plans').upsert(p);if(error)alert(error.message)}
-async function load(){const {data,error}=await sb.from('plans').select('*');if(!error){plans=data;cache();render()}}
+ const {error}=await sb.from('plans').upsert(p);if(error)offq([p],error)}
+async function load(){const {data,error}=await sb.from('plans').select('*');if(!error){TRASH=data.filter(p=>p.deleted_at);plans=data.filter(p=>!p.deleted_at);cache();render()}}
 function parse(t){const now=new Date();let s=t,d=null,tm=null,m;const R=r=>{const x=s.match(r);if(x)s=s.replace(x[0],' ');return x};
  if(R(/bugün/i))d=ymd(now);else if(R(/yarın/i))d=ymd(add(now,1));else if(R(/öbür gün|ertesi gün/i))d=ymd(add(now,2));
  else if(m=R(/(\d{1,2})\s*(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık)/i)){const x=new Date(now.getFullYear(),AY.map(a=>a.toLocaleLowerCase(TR)).indexOf(m[2].toLocaleLowerCase(TR)),+m[1]);if(x<add(now,-1))x.setFullYear(x.getFullYear()+1);d=ymd(x)}
@@ -61,7 +61,7 @@ const tog=id=>{const p=plans.find(x=>x.id==id);save({...p,done:!p.done})};
 /* ---------- sayfalar (sheet) ---------- */
 const sheet=h=>{$('#sh').innerHTML=`<div>${h}</div>`;$('#sh').classList.add('o')},close=()=>$('#sh').classList.remove('o');
 function edit(id){const p=plans.find(x=>x.id==id);
- sheet(`<div class="card"><input id="et" value="${esc(p.title)}"><input id="ed" type="date" value="${p.day}"><input id="etm" type="time" value="${p.time||''}"></div><div class="seg">${['Hafif','Orta','Ağır'].map((x,i)=>`<button data-w="${i}" class="${p.weight==i?'on':''}">${x}</button>`).join('')}</div><div class="card"><button class="row" data-a="move" data-i="${id}">Bugüne al</button><button class="row red" data-a="del" data-i="${id}">Sil</button></div><button class="big" data-a="ok" data-i="${id}">Kaydet</button>`)}
+ sheet(`<div class="card"><input id="et" value="${esc(p.title)}"><input id="ed" type="date" value="${p.day||''}"><input id="etm" type="time" value="${p.time||''}">${rmSel(p)}${rpSel(p)}</div><div class="seg">${['Hafif','Orta','Ağır'].map((x,i)=>`<button data-w="${i}" class="${p.weight==i?'on':''}">${x}</button>`).join('')}</div><div class="card"><button class="row" data-a="move" data-i="${id}">Bugüne al</button><button class="row red" data-a="del" data-i="${id}">Sil</button></div><button class="big" data-a="ok" data-i="${id}">Kaydet</button>`)}
 const b64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 async function push(){try{const reg=await navigator.serviceWorker.ready;if(await Notification.requestPermission()!='granted')return alert('Bildirim izni verilmedi.');
  const s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(CFG.vapid)});
@@ -73,9 +73,9 @@ async function act(a,i){const p=i&&plans.find(x=>x.id==i);
  else if(a=='logout'){await sb.auth.signOut();localStorage.clear();location.reload()}
  else if(a=='in'||a=='up'){const c={email:$('#em').value.trim(),password:$('#pw').value};const {data,error}=await(a=='in'?sb.auth.signInWithPassword(c):sb.auth.signUp(c));
   if(error)alert(error.message);else if(data.session)location.reload();else alert('E-postandaki bağlantıyla hesabı onayla, sonra giriş yap.')}
- else if(a=='ok')save({...p,title:$('#et').value.trim()||p.title,day:$('#ed').value||p.day,time:$('#etm').value||null,weight:+($('[data-w].on')?.dataset.w??p.weight)}),close();
+ else if(a=='ok')save({...p,title:$('#et').value.trim()||p.title,day:$('#ed').value||p.day,time:$('#etm').value||null,remind_min:+$('#erm').value,repeat:$('#erp').value||null,weight:+($('[data-w].on')?.dataset.w??p.weight)}),close();
  else if(a=='move'){save({...p,day:TODAY()});close()}
- else if(a=='del'){plans=plans.filter(x=>x.id!=i);cache();render();close();sb.from('plans').delete().eq('id',i)}}
+ else if(a=='del'){softDel(i);close()}}
 
 /* ---------- olaylar ---------- */
 document.addEventListener('pointerdown',e=>{$('#app').style.transformOrigin=`${e.pageX-$('#app').offsetLeft}px ${e.pageY}px`});
