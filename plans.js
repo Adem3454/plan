@@ -1,3 +1,4 @@
+const COARSE=matchMedia("(pointer:coarse)").matches;
 /* Planlar: paylaşım, roller, alt görevler, kişilere sürükle-bırak */
 const COL=['#ff375f','#ff9f0a','#30d158','#0a84ff','#bf5af2','#64d2ff'];
 const TPL={'Boş':[],'Hackathon':['Fikir ve kapsam','Tasarım','Frontend','Backend','Sunum'],'Etkinlik':['Mekân','Davetiye','Yemek','Müzik','Bütçe'],'İş projesi':['Hedefleri yaz','Plan çıkar','İlk taslak','Gözden geçir','Teslim']};
@@ -29,7 +30,7 @@ function planRender(p){const ts=TK.filter(t=>t.project_id==p.id).sort((a,b)=>a.p
  const cols=V2=='kisi'?[['','Atanmamış'],...mem(p).map(m=>[m.email,m.name])]:[['todo','Yapılacak'],['doing','Sürüyor'],['done','Bitti']];
  $('#app').innerHTML=`<nav><span><button class="mb" data-pa="menu">☰</button></span><span><button data-pa="pset">${own(p)?'Kişiler ⋯':'Kişiler'}</button></span></nav><div class="ph" style="--c:${p.color}"><div><h1>${esc(p.name)}</h1><small>${dn}/${ts.length} görev tamam · %${pc} · ${mem(p).length} kişi${left(p)}${own(p)?'':' · sadece kendi görevlerini düzenleyebilirsin'}</small></div><span class="rg" style="--p:${pc}"><b>${pc}%</b></span></div><div class="seg"><button data-vw="pano" class="${V2=='pano'?'on':''}">Pano</button><button data-vw="kisi" class="${V2=='kisi'?'on':''}">Kişiler</button></div><div class="cols">${cols.map(([c,n])=>{const a=ts.filter(t=>V2=='kisi'?(c===''?!mem(p).some(m=>m.email==t.assignee):t.assignee==c):t.status==c),k=V2=='kisi'&&a.length;
   return `<div class="col"><h3>${V2=='kisi'&&c!==''?`<span class="rg" style="--p:${a.length?Math.round(avg(a)*100):0}"><b>${esc(n[0].toLocaleUpperCase(TR))}</b></span>`:''}<span class="nm">${esc(n)}</span><small>${V2=='kisi'&&a.length?a.filter(t=>t.status=='done').length+'/'+a.length:a.length}</small></h3><div class="list" data-c="${esc(c)}">${a.map(t=>card(t,p)).join('')}</div></div>`}).join('')}</div>`;
- document.querySelectorAll('.list').forEach(el=>new Sortable(el,{group:'t',animation:220,delay:150,delayOnTouchOnly:true,ghostClass:'gh',forceFallback:true,fallbackTolerance:4,disabled:!own(p),onEnd:dropped}))}
+ document.querySelectorAll('.list').forEach(el=>new Sortable(el,{group:'t',animation:220,delay:150,delayOnTouchOnly:true,ghostClass:'gh',forceFallback:COARSE,fallbackOnBody:true,fallbackTolerance:4,emptyInsertThreshold:24,disabled:!own(p),onEnd:dropped}))}
 function dropped(e){const c=e.to.dataset.c,t=TK.find(x=>x.id==e.item.dataset.t),ch=new Set();
  if(V2=='kisi')t.assignee=c||null;else t.status=c;
  for(const l of new Set([e.to,e.from]))[...l.children].forEach((el,i)=>{const x=TK.find(y=>y.id==el.dataset.t);if(x){x.pos=i;ch.add(x)}});
@@ -259,9 +260,9 @@ function cyc(id){const p=plans.find(x=>x.id==id),s={todo:'doing',doing:'done',do
  if(s=='doing'&&plans.filter(x=>x.day==p.day&&x.status=='doing'&&x.id!=p.id).length>=3&&!confirm('Yapılıyor şeridinde 3 iş var. Yine de eklensin mi?'))return;setStatus(p,s);save(p)}
 function nxt(id){const p=plans.find(x=>x.id==id);p.day=ymd(add(dt(p.day||TODAY()),1));if(stOf(p)=='doing')setStatus(p,'todo');save(p)}
 function afterCal(){const w=$('.wk7');if(w){const t=$('.wc.t');w.scrollLeft=WSL!=null?WSL:t?t.offsetLeft-(w.clientWidth-t.clientWidth)/2:0}
- document.querySelectorAll('.wl,.ln').forEach(el=>new Sortable(el,{group:'pl',animation:200,delay:150,delayOnTouchOnly:true,forceFallback:true,fallbackTolerance:4,ghostClass:'gh',onAdd:tileAdd,onEnd:e=>dropPlan(e,el.classList.contains('ln')?'s':'w')}))}
+ document.querySelectorAll('.wl,.ln').forEach(el=>new Sortable(el,{group:'pl',animation:200,delay:150,delayOnTouchOnly:true,forceFallback:COARSE,fallbackOnBody:true,fallbackTolerance:4,emptyInsertThreshold:24,ghostClass:'gh',onAdd:tileAdd,onEnd:e=>dropPlan(e,el.classList.contains('ln')?'s':'w')}))}
 $('#bar').insertAdjacentHTML('afterbegin','<div id="dock"><button class="tile" data-tile="plan">🕒<small>Plan</small></button><button class="tile" data-tile="task">☑️<small>Görev</small></button><button class="tile" data-tile="note">📝<small>Not</small></button><button class="tile" data-tile="list">📋<small>Liste</small></button><button class="tile" data-tile="goal">🎯<small>Hedef</small></button><button class="tile" data-tile="season">🌤️<small>Dönem</small></button></div>');
-new Sortable($('#dock'),{group:{name:'pl',pull:'clone',put:false},sort:false,animation:150,delay:120,delayOnTouchOnly:true,forceFallback:true,fallbackTolerance:4,onEnd:()=>{LD=Date.now()}});
+new Sortable($('#dock'),{group:{name:'pl',pull:'clone',put:false},sort:false,animation:150,delay:120,delayOnTouchOnly:true,forceFallback:COARSE,fallbackOnBody:true,fallbackTolerance:4,emptyInsertThreshold:24,onEnd:()=>{LD=Date.now()}});
 document.addEventListener('scroll',e=>{if(e.target.classList&&e.target.classList.contains('wk7'))WSL=e.target.scrollLeft},true);
 document.addEventListener('click',e=>{const t=e.target;let x;
  if(x=t.closest('[data-st]')){e.stopImmediatePropagation();cyc(x.dataset.st)}
