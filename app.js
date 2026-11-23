@@ -8,7 +8,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const cache=()=>localStorage.setItem('plans',JSON.stringify(plans));
 let sb,user,plans=[],V={l:'day',d:new Date()};
 
-const byDay=ds=>plans.filter(p=>p.day===ds&&p.kind!='season'&&p.kind!='goal').sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
+const byDay=ds=>plans.filter(p=>p.day===ds&&!['season','goal','habit','bday','anniv'].includes(p.kind)).sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
 const ld=ds=>byDay(ds).reduce((s,p)=>s+p.weight+1,0);
 
 /* ---------- görünümler ---------- */
@@ -61,7 +61,7 @@ const tog=id=>{const p=plans.find(x=>x.id==id);save({...p,done:!p.done})};
 /* ---------- sayfalar (sheet) ---------- */
 const sheet=h=>{$('#sh').innerHTML=`<div>${h}</div>`;$('#sh').classList.add('o')},close=()=>$('#sh').classList.remove('o');
 function edit(id){const p=plans.find(x=>x.id==id);
- sheet(`<div class="card"><input id="et" value="${esc(p.title)}"><input id="ed" type="date" value="${p.day||''}"><input id="etm" type="time" value="${p.time||''}">${rmSel(p)}${rpSel(p)}${iconSel(p)}</div><div class="seg">${['Hafif','Orta','Ağır'].map((x,i)=>`<button data-w="${i}" class="${p.weight==i?'on':''}">${x}</button>`).join('')}</div><div class="card"><button class="row" data-a="move" data-i="${id}">Bugüne al</button><button class="row red" data-a="del" data-i="${id}">Sil</button></div><button class="big" data-a="ok" data-i="${id}">Kaydet</button>`)}
+ sheet(`<div class="card"><input id="et" value="${esc(p.title)}"><input id="ed" type="date" value="${p.day||''}"><input id="etm" type="time" value="${p.time||''}">${rmSel(p)}${rpSel(p)}${iconSel(p)}${estSel(p)}${goalSel(p)}</div><div class="seg">${['Hafif','Orta','Ağır'].map((x,i)=>`<button data-w="${i}" class="${p.weight==i?'on':''}">${x}</button>`).join('')}</div><div class="card"><button class="row" data-a="move" data-i="${id}">Bugüne al</button><button class="row red" data-a="del" data-i="${id}">Sil</button></div><button class="big" data-a="ok" data-i="${id}">Kaydet</button>`)}
 const b64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 async function push(){try{const reg=await navigator.serviceWorker.ready;if(await Notification.requestPermission()!='granted')return alert('Bildirim izni verilmedi.');
  const s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(CFG.vapid)});
@@ -73,7 +73,7 @@ async function act(a,i){const p=i&&plans.find(x=>x.id==i);
  else if(a=='logout'){await sb.auth.signOut();localStorage.clear();location.reload()}
  else if(a=='in'||a=='up'){const c={email:$('#em').value.trim(),password:$('#pw').value};const {data,error}=await(a=='in'?sb.auth.signInWithPassword(c):sb.auth.signUp(c));
   if(error)alert(error.message);else if(data.session)location.reload();else alert('E-postandaki bağlantıyla hesabı onayla, sonra giriş yap.')}
- else if(a=='ok')save({...p,title:$('#et').value.trim()||p.title,day:$('#ed').value||p.day,time:$('#etm').value||null,remind_min:+$('#erm').value,repeat:$('#erp').value||null,icon:$('#eic').value||null,weight:+($('[data-w].on')?.dataset.w??p.weight)}),close();
+ else if(a=='ok')save({...p,title:$('#et').value.trim()||p.title,day:$('#ed').value||p.day,time:$('#etm').value||null,remind_min:+$('#erm').value,repeat:$('#erp').value||null,icon:$('#eic').value||null,est:+$('#ees').value||null,goal_id:$('#egl')?($('#egl').value||null):p.goal_id,weight:+($('[data-w].on')?.dataset.w??p.weight)}),close();
  else if(a=='move'){save({...p,day:TODAY()});close()}
  else if(a=='del'){softDel(i);close()}}
 

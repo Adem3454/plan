@@ -162,10 +162,24 @@ h1.hb{font-size:26px;margin:4px 0 12px}.hr1{display:flex;justify-content:space-b
 body.eve{--bg:#f7f0e6;--card:#fffaf3;--mat:rgba(250,242,230,.8)}@media(prefers-color-scheme:dark){body.eve{--bg:#0e0b09;--card:#1d1814;--mat:rgba(30,24,20,.8)}}
 body.dense .pc{padding:4px 7px;margin-top:3px;font-size:12px}body.dense .p{padding:6px 12px}body.dense .card{margin-bottom:8px}
 @media(prefers-reduced-motion:reduce){.dt.doing,.settle,.cele{animation:none}#app.enter .pc,#app.enter .card,#app.enter .p{animation:none}}
+body{font-size:calc(15px*var(--fm,1))}.pc,.chip{font-size:calc(13px*var(--fm,1))}small,.tt small{font-size:calc(12px*var(--fm,1))}.hint{font-size:calc(14px*var(--fm,1))}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.ab{display:none}.cb .ab{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--ac2);color:#fff;font-size:11px;align-items:center;justify-content:center;flex:none}
+.cb .dt.done::after{content:"✓";color:#fff;font-size:10px;display:block;text-align:center;line-height:14px}.cb .dt.doing{border:3px solid var(--ac);background:transparent}
+#selbar{display:none;max-width:760px;margin:0 auto 6px;gap:6px;align-items:center;background:var(--card);border-radius:14px;padding:6px 10px}#selbar span{flex:1;font-size:13px}.pc.sel{outline:2px solid var(--ac)}
+#focus{position:fixed;inset:0;z-index:30;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}.ftm{font-size:64px;font-weight:200;font-variant-numeric:tabular-nums;margin:18px 0}.fc small{color:#aaa}
+#tabs b{filter:none;opacity:1;display:flex}
+body.snow::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.45;background-image:radial-gradient(circle,#9bb8e6 1.6px,transparent 2.2px),radial-gradient(circle,#9bb8e6 1px,transparent 1.6px);background-size:90px 90px,60px 60px;background-position:0 0,30px 40px;animation:snow 16s linear infinite}@keyframes snow{to{background-position:20px 900px,10px 940px}}
+@media(prefers-reduced-motion:reduce){body.snow::before{animation:none}}
+.pc{position:relative;touch-action:pan-y}.wc,.ln-w{overflow:hidden}.lanes{position:relative}
+.pc[data-sw]{background:color-mix(in srgb,var(--ok) 28%,var(--bg))}.pc[data-sw=r]{background:color-mix(in srgb,var(--ac) 28%,var(--bg))}
+.pc[data-sw]::after{content:attr(data-lb);position:absolute;top:50%;transform:translateY(-50%);right:10px;font-size:12px;font-weight:600;color:var(--l)}.pc[data-sw=r]::after{right:auto;left:10px}
+.dp{display:none}@media(max-width:999px){.dp{display:flex}}
 </style></head><body>
 <div id="app"></div>
 <div id="bar"><form id="qf"><input id="q" placeholder="yarın 15:00 diş hekimi" enterkeyhint="done" autocomplete="off"><button aria-label="Ekle">+</button></form></div>
 <aside id="side"></aside><div id="sh"></div>
+<script src="offline.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="config.js"></script><script src="app.js"></script><script src="plans.js"></script>

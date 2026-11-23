@@ -17,7 +17,7 @@ async function loadProj(){const r=await Promise.all(['projects','tasks','subtask
 const _load=load;load=async function(){await _load();await loadProj()};
 const _z=zoom,_s=shift;zoom=d=>P=='cal'&&_z(d);shift=n=>P=='cal'&&_s(n);
 const _render=render;
-render=function(d){if(SH)return shareRender();const p=cur();theme();applyLook();nowBar();tabsOn();if(d){$('#app').classList.add('enter');setTimeout(()=>$('#app').classList.remove('enter'),700)}{const rk=P=='cal'&&(V.l=='week'||V.l=='day');$('#dock').style.display=rk?'flex':'none';$('#pl').style.display=rk?'none':''}$('#q').placeholder=P=='cal'?'yarın 15:00 diş hekimi':'Görev ekle · @ali pastayı al';
+render=function(d){if(SH)return shareRender();const p=cur();theme();applyLook();nowBar();tabsOn();if(d){$('#app').classList.add('enter');setTimeout(()=>$('#app').classList.remove('enter'),700)}{const rk=P=='cal'&&(V.l=='week'||V.l=='day'||V.l=='month'||V.l=='year');$('#dock').style.display=rk?'flex':'none';$('#pl').style.display=rk?'none':''}$('#q').placeholder=P=='cal'?'yarın 15:00 diş hekimi':'Görev ekle · @ali pastayı al';
  if(P!='cal'&&P!='my'&&!p)P='cal';drawSide();$('#bar').style.display=((p&&!own(p))||P=='my')?'none':'';
  if(P=='cal'){_render(d);afterCal();return}
  if(P=='my'){myRender();return}
@@ -143,7 +143,7 @@ document.addEventListener('click',e=>{const x=e.target.closest('[data-su]');if(x
 const _act=act;
 act=async function(a,i){
  if(a=='set'){const r=await sb.rpc('my_username');
-  sheet(`<p class="hint">${esc(user.email)}</p><h2>Kullanıcı adı</h2><div class="card"><input id="un" value="${esc(r.data||'')}" placeholder="kullanıcı adı" autocapitalize="none" autocomplete="off"></div><button class="big" data-a="un">Kaydet</button><div class="card" style="margin-top:16px"><button class="row" data-pa="look">Görünüm</button><button class="row" data-pa="shr">Paylaş ve abone ol</button><button class="row" data-pa="rt">Rutin günler</button><button class="row" data-pa="bulk">Toplu ekle</button><button class="row" data-pa="trs">Silinenler</button><button class="row" data-pa="khp">Kısayollar</button><button class="row" data-pa="ics">Takvime aktar (.ics)</button><button class="row" data-a="push">Bildirimleri aç</button><button class="row red" data-a="logout">Çıkış yap</button></div>`)}
+  sheet(`<p class="hint">${esc(user.email)}</p><h2>Kullanıcı adı</h2><div class="card"><input id="un" value="${esc(r.data||'')}" placeholder="kullanıcı adı" autocapitalize="none" autocomplete="off"></div><button class="big" data-a="un">Kaydet</button><div class="card" style="margin-top:16px"><button class="row" data-pa="look">Görünüm</button><button class="row" data-pa="tpl">Şablonlarım ve paylaşım</button><button class="row" data-pa="nfs">Bildirim ayarları</button><button class="row" data-pa="icsin">Takvimden içe aktar (.ics)</button><button class="row" data-pa="shr">Paylaş ve abone ol</button><button class="row" data-pa="rt">Rutin günler</button><button class="row" data-pa="bulk">Toplu ekle</button><button class="row" data-pa="trs">Silinenler</button><button class="row" data-pa="khp">Kısayollar</button><button class="row" data-pa="ics">Takvime aktar (.ics)</button><button class="row" data-a="push">Bildirimleri aç</button><button class="row red" data-a="logout">Çıkış yap</button></div>`)}
  else if(a=='un'){const r=await sb.rpc('set_username',{u:$('#un').value.trim()});if(r.error)alert(r.error.message);else{close();alert('Kullanıcı adın kaydedildi.')}}
  else if(a=='up'){const u=($('#usr')?.value||'').trim().toLowerCase();if(!/^[a-z0-9_.]{3,20}$/.test(u))return alert('Kullanıcı adı 3-20 karakter olmalı: harf, rakam, _ ve .');
   const f=await sb.rpc('username_free',{u});if(!f.data)return alert('Bu kullanıcı adı alınmış, başka bir tane dene.');
@@ -234,14 +234,14 @@ const sp=p=>(p.spent||0)+(stOf(p)=='doing'&&p.started_at?Math.round((Date.now()-
 function setStatus(p,s){if(stOf(p)=='doing'&&p.started_at){p.spent=(p.spent||0)+Math.round((Date.now()-new Date(p.started_at))/6e4);p.started_at=null}
  if(s=='doing')p.started_at=new Date().toISOString();p.status=s;p.done=s=='done'}
 const _sv=save;save=async function(p){pushUndo();if(!p.kind)p.kind=p.time?'plan':'task';hashArea(p);if(p.done&&p.status!='done')setStatus(p,'done');else if(!p.done&&p.status=='done')p.status='todo';spawn(p);return _sv(p)};
-const pc=p=>{const s=stOf(p),m=sp(p);return `<div class="pc${p.done?' done':''}${p.kind=='note'?' nt':''}" data-id="${p.id}" style="--ac2:${AC[p.area]||'transparent'}">${p.kind=='note'?'<span>📝</span>':`<span class="dt ${s}" data-st="${p.id}"></span>`}<div class="tt">${p.icon?p.icon+' ':''}${esc(p.title)}<small>${[p.time,m?m+' dk':'',(p.kind=='list'||p.kind=='goal')?lp(p):'',p.kind=='note'&&p.body?esc(p.body.slice(0,40)):''].filter(Boolean).join(' · ')}</small></div>${p.day?'':`<button class="nx" data-bf="${p.id}" aria-label="Boşluk bul">⌖</button>`}<button class="nx" data-nx="${p.id}" aria-label="Yarına at">→</button></div>`};
+const pc=p=>{const s=stOf(p),m=sp(p);return `<div class="pc${p.done?' done':''}${p.kind=='note'?' nt':''}" data-id="${p.id}" style="--ac2:${AC[p.area]||'transparent'}">${p.area?`<span class="ab">${p.area[0]}</span>`:''}${p.kind=='note'?'<span>📝</span>':`<span class="dt ${s}" data-st="${p.id}"></span>`}<div class="tt">${p.icon?p.icon+' ':''}${esc(p.title)}<small>${[p.time,p.est?'~'+p.est+' dk':'',p.who?'👤 '+esc(p.who):'',p.goal_id?'🎯 '+esc((plans.find(g=>g.id==p.goal_id)||{}).title||''):'',m?m+' dk':'',(p.kind=='list'||p.kind=='goal')?lp(p):'',p.kind=='note'&&p.body?esc(p.body.slice(0,40)):''].filter(Boolean).join(' · ')}</small></div>${p.day?'':`<button class="nx" data-bf="${p.id}" aria-label="Boşluk bul">⌖</button>`}<button class="nx" data-nx="${p.id}" aria-label="Yarına at">→</button></div>`};
 const dueBand=()=>{const ds=ymd(V.d),a=TK.filter(t=>t.due==ds&&t.status!='done'&&(t.assignee==ME()||(!t.assignee&&PJ.some(p=>p.id==t.project_id&&own(p)))));return a.length?`<h2>Planlardan</h2><div class="card">${a.map(myRow).join('')}</div>`:''};
 vWeek=function(){const s=mon(V.d),e=add(s,6),t=TODAY(),sh=d=>AY[d.getMonth()].slice(0,3);if(WK!=ymd(s)){WK=ymd(s);WSL=null}
  let h=`<h1>${s.getDate()} ${sh(s)} – ${e.getDate()} ${sh(e)}</h1><div class="wk7">`,mins=0;
- for(let i=0;i<7;i++){const d=add(s,i),ds=ymd(d),a=plans.filter(p=>p.day===ds&&isCard(p)).sort(by),w=ld(ds);a.forEach(p=>mins+=sp(p));
+ for(let i=0;i<7;i++){const d=add(s,i),ds=ymd(d),a=plans.filter(p=>p.day===ds&&isCard(p)&&fltOk(p)).sort(by),w=ld(ds);a.forEach(p=>mins+=sp(p));
   h+=`<div class="wc${ds===t?' t':''}"><div class="wh" data-g="day:${ds}"><b>${GN[d.getDay()].slice(0,3)}</b> ${d.getDate()}</div><div class="m${w>=7?' hot':''}"><i style="width:${Math.min(100,w*12.5)}%"></i></div><div class="wl" data-d="${ds}">${a.map(pc).join('')}</div></div>`}
  return h+`</div><h2>Havuz · tarihsiz işler</h2><div class="wl pool" data-d="">${plans.filter(p=>!p.day&&!p.done).sort(by).map(pc).join('')}</div>`+(mins?`<p class="hint">Bu hafta ${Math.floor(mins/60)} sa ${mins%60} dk odaklandın.</p>`:'')};
-vDay=function(){const ds=ymd(V.d),t=TODAY(),a=plans.filter(p=>p.day===ds&&isCard(p)).sort(by),tm=a.filter(p=>p.time&&p.kind!='note');
+vDay=function(){const ds=ymd(V.d),t=TODAY(),a=plans.filter(p=>p.day===ds&&isCard(p)&&fltOk(p)).sort(by),tm=a.filter(p=>p.time&&p.kind!='note');
  let h=`<h1>${V.d.getDate()} ${AY[V.d.getMonth()]}<small>${GN[V.d.getDay()]}</small></h1>`;
  if(tm.length)h+=`<div class="strip">${tm.map(p=>`<span class="chip${p.done?' done':''}" data-id="${p.id}">${p.time} ${esc(p.title)}</span>`).join('')}</div>`;
  h+=`<!--L--><div class="lanes">${[['todo','Yapılacak'],['doing','Yapılıyor'],['done','Yapıldı']].map(([s,n])=>{const l=a.filter(p=>stOf(p)==s);return `<div class="ln-w st-${s}"><h3>${n}<small>${s=='doing'?l.length+'/3':l.length}</small></h3><div class="ln" data-s="${s}">${l.map(pc).join('')}</div></div>`}).join('')}</div><!--/L-->`;
@@ -256,14 +256,14 @@ function dropPlan(e,mode){const id=e.item.dataset.id;if(!id)return;pushUndo();LM
  for(const l of new Set([e.to,e.from]))[...l.children].forEach((el,i)=>{const x=plans.find(y=>y.id==el.dataset.id);if(x){x.pos=i;ch.add(x)}});
  ch.forEach(x=>{x.remind_at=remind(x);x.notified=false});cache();setTimeout(render,0);sb.from('plans').upsert([...ch]).then(r=>r.error&&offq([...ch],r.error))}
 function tileAdd(e){const k=e.item.dataset.tile;if(!k)return;e.item.remove();newItem(k,e.to.dataset.d!==undefined?e.to.dataset.d:ymd(V.d),e.to.dataset.s||'todo')}
-function newItem(k,d,s){sheet(`<h2>${{plan:'Yeni plan',task:'Yeni görev',note:'Yeni not'}[k]}</h2><div class="card"><input id="ni" placeholder="Başlık">${k=='plan'?'<input id="nt" type="time">'+rmSel({}):''}${k=='plan'||k=='task'?rpSel({}):''}${k=='plan'||k=='task'||k=='list'?areaSel()+iconSel({}):''}${k=='note'?'<textarea id="nb" placeholder="Yaz…"></textarea>':''}<input id="nd" type="date" value="${d||''}"></div><button class="big" data-pa="nk" data-i="${k}|${s}">Ekle</button>`);$('#ni').focus()}
+function newItem(k,d,s){sheet(`<h2>${{plan:'Yeni plan',task:'Yeni görev',note:'Yeni not'}[k]}</h2><div class="card"><input id="ni" placeholder="Başlık">${k=='plan'||k=='remind'?'<input id="nt" type="time">'+rmSel({}):''}${k=='plan'||k=='task'?rpSel({}):''}${k=='plan'||k=='task'||k=='list'?areaSel()+iconSel({})+estSel({})+goalSel({}):''}${k=='note'?'<textarea id="nb" placeholder="Yaz…"></textarea>':''}<input id="nd" type="date" value="${d||''}"></div><button class="big" data-pa="nk" data-i="${k}|${s}">Ekle</button>`);$('#ni').focus()}
 function roll(ds){pushUndo();const nx=ymd(add(dt(ds),1)),a=plans.filter(p=>p.day==ds&&!p.done&&isCard(p));a.forEach(p=>{if(stOf(p)=='doing')setStatus(p,'todo');p.moved=(p.moved||0)+1;p.day=nx;p.remind_at=remind(p);p.notified=false});cache();render();sb.from('plans').upsert(a).then(r=>r.error&&offq(a,r.error))}
 function cyc(id){pushUndo();LM=id;const p=plans.find(x=>x.id==id),s={todo:'doing',doing:'done',done:'todo'}[stOf(p)];
  if(s=='doing'&&plans.filter(x=>x.day==p.day&&x.status=='doing'&&x.id!=p.id).length>=3&&!confirm('Yapılıyor şeridinde 3 iş var. Yine de eklensin mi?'))return;setStatus(p,s);save(p)}
 function nxt(id){pushUndo();const p=plans.find(x=>x.id==id);p.day=ymd(add(dt(p.day||TODAY()),1));p.moved=(p.moved||0)+1;if(stOf(p)=='doing')setStatus(p,'todo');save(p)}
 function afterCal(){badge();polish();const w=$('.wk7');if(w){const t=$('.wc.t');w.scrollLeft=WSL!=null?WSL:t?t.offsetLeft-(w.clientWidth-t.clientWidth)/2:0}
  }
-$('#bar').insertAdjacentHTML('afterbegin','<div id="dock"><button class="tile" data-tile="plan">🕒<small>Plan</small></button><button class="tile" data-tile="task">☑️<small>Görev</small></button><button class="tile" data-tile="note">📝<small>Not</small></button><button class="tile" data-tile="list">📋<small>Liste</small></button><button class="tile" data-tile="goal">🎯<small>Hedef</small></button><button class="tile" data-tile="season">🌤️<small>Dönem</small></button></div>');
+$('#bar').insertAdjacentHTML('afterbegin','<div id="dock"><button class="tile" data-tile="plan">🕒<small>Plan</small></button><button class="tile" data-tile="task">☑️<small>Görev</small></button><button class="tile" data-tile="note">📝<small>Not</small></button><button class="tile" data-tile="list">📋<small>Liste</small></button><button class="tile" data-tile="goal">🎯<small>Hedef</small></button><button class="tile" data-tile="season">🌤️<small>Dönem</small></button><button class="tile" data-tile="habit">🔁<small>Alışkanlık</small></button><button class="tile" data-tile="remind">🔔<small>Hatırlat</small></button><button class="tile" data-tile="bday">🎂<small>Doğum günü</small></button><button class="tile" data-tile="anniv">💞<small>Yıldönümü</small></button></div>');
 
 document.addEventListener('scroll',e=>{if(e.target.classList&&e.target.classList.contains('wk7'))WSL=e.target.scrollLeft},true);
 document.addEventListener('click',e=>{const t=e.target;let x;
@@ -272,30 +272,30 @@ document.addEventListener('click',e=>{const t=e.target;let x;
  else if(x=t.closest('[data-tile]')){if(Date.now()-LD>300)newItem(x.dataset.tile,V.l=='day'?ymd(V.d):TODAY(),'todo')}},true);
 const _pn=pact;
 pact=async function(a,i){
- if(a=='nk'){const [k,s]=i.split('|'),r={id:crypto.randomUUID(),title:$('#ni').value.trim(),day:$('#nd').value||null,time:k=='plan'?($('#nt').value||null):null,weight:1,done:s=='done',status:s,kind:k,body:k=='note'?($('#nb').value.trim()||null):null,pos:9999};if(!r.title)return;close();save(r)}
+ if(a=='nk'){const [k,s]=i.split('|'),r={id:crypto.randomUUID(),title:$('#ni').value.trim(),day:$('#nd').value||null,time:k=='plan'||k=='remind'?($('#nt').value||null):null,weight:1,done:s=='done',status:s,kind:k,body:k=='note'?($('#nb').value.trim()||null):null,pos:9999};if(!r.title)return;close();save(r)}
  else if(a=='roll'){roll(i);close()}
  else return _pn(a,i)};
 
 /* ---- tek ekle paleti, liste, hedef, dönem ---- */
-const isCard=p=>!['season','goal'].includes(p.kind);
+const isCard=p=>!['season','goal','habit','bday','anniv'].includes(p.kind);
 const ICON={plan:'🕒',task:'☑️',list:'📋',note:'📝',goal:'🎯',season:'🌤️'},NAME={plan:'Plan',task:'Görev',list:'Liste',note:'Not',goal:'Hedef',season:'Dönem'};
 const ORDER={year:['season','goal','plan','task','list','note'],month:['goal','plan','season','task','list','note'],week:['task','plan','list','goal','note','season'],day:['plan','task','note','list','goal','season']};
 let LID=null;
 const lp=p=>{const l=(p.body||'').split('\n').filter(Boolean);return l.length?l.filter(x=>x[1]=='x').length+'/'+l.length:''};
 function addPal(){document.body.classList.remove('sd');sheet(`<div class="card"><input id="pi" placeholder="yarın 15:00 diş hekimi ya da süt al" enterkeyhint="done" autocomplete="off"></div><div class="grid">${ORDER[V.l].map(k=>`<button class="tl" data-tp2="${k}">${ICON[k]}<small>${NAME[k]}</small></button>`).join('')}</div>`);$('#pi').focus()}
-function newItem(k,d,s,t=''){const N={plan:'Yeni plan',task:'Yeni görev',list:'Yeni liste',note:'Yeni not',goal:'Yeni hedef',season:'Yeni dönem'};
- sheet(`<h2>${N[k]}</h2><div class="card"><input id="ni" placeholder="Başlık" value="${esc(t)}">${k=='plan'?'<input id="nt" type="time">'+rmSel({}):''}${k=='plan'||k=='task'?rpSel({}):''}${k=='plan'||k=='task'||k=='list'?areaSel()+iconSel({}):''}${k=='goal'?`<select id="ns"><option value="week">Haftalık hedef</option><option value="month"${V.l=='month'?' selected':''}>Aylık hedef</option><option value="year"${V.l=='year'?' selected':''}>Yıllık hedef</option></select>`:''}${k=='season'?`<select id="nc">${COL.map((c,i)=>`<option value="${c}">Renk ${i+1}</option>`).join('')}</select>`:''}${k=='note'?'<textarea id="nb" placeholder="Yaz…"></textarea>':''}${k=='list'||k=='goal'?`<textarea id="nb" placeholder="${k=='goal'?'Adımlar, her satıra bir tane':'Maddeler, her satıra bir tane'}"></textarea>`:''}<input id="nd" type="date" value="${d||''}">${k=='season'?`<input id="ne" type="date" value="${ymd(add(dt(d||TODAY()),6))}">`:''}</div><button class="big" data-pa="nk" data-i="${k}|${s}">Ekle</button>`);$('#ni').focus()}
+function newItem(k,d,s,t=''){const N={plan:'Yeni plan',task:'Yeni görev',list:'Yeni liste',note:'Yeni not',goal:'Yeni hedef',season:'Yeni dönem',habit:'Yeni alışkanlık',remind:'Yeni hatırlatma',bday:'Yeni doğum günü',anniv:'Yeni yıldönümü'};
+ sheet(`<h2>${N[k]}</h2><div class="card"><input id="ni" placeholder="Başlık" value="${esc(t)}">${k=='plan'||k=='remind'?'<input id="nt" type="time">'+rmSel({}):''}${k=='plan'||k=='task'?rpSel({}):''}${k=='plan'||k=='task'||k=='list'?areaSel()+iconSel({})+estSel({})+goalSel({}):''}${k=='goal'?`<select id="ns"><option value="week">Haftalık hedef</option><option value="month"${V.l=='month'?' selected':''}>Aylık hedef</option><option value="year"${V.l=='year'?' selected':''}>Yıllık hedef</option></select>`:''}${k=='season'?`<select id="nc">${COL.map((c,i)=>`<option value="${c}">Renk ${i+1}</option>`).join('')}</select>`:''}${k=='note'?'<textarea id="nb" placeholder="Yaz…"></textarea>':''}${k=='list'||k=='goal'?`<textarea id="nb" placeholder="${k=='goal'?'Adımlar, her satıra bir tane':'Maddeler, her satıra bir tane'}"></textarea>`:''}<input id="nd" type="date" value="${d||''}">${k=='season'?`<input id="ne" type="date" value="${ymd(add(dt(d||TODAY()),6))}">`:''}</div><button class="big" data-pa="nk" data-i="${k}|${s}">Ekle</button>`);$('#ni').focus()}
 function listSheet(id){LID=id;const p=plans.find(x=>x.id==id);
- if(p.kind=='season')return sheet(`<h2>${esc(p.title)}</h2><p class="hint">${fmtD(p.day)} – ${fmtD(p.end_day||p.day)}</p><div class="card"><button class="row red" data-pa="pdl" data-i="${id}">Sil</button></div>`);
+ if(['season','bday','anniv'].includes(p.kind))return sheet(`<h2>${esc(p.title)}</h2><p class="hint">${p.kind=='season'?fmtD(p.day)+' – '+fmtD(p.end_day||p.day):fmtD(p.day)+' · her yıl'}</p><div class="card"><button class="row red" data-pa="pdl" data-i="${id}">Sil</button></div>`);
  const ls=(p.body||'').split('\n').filter(Boolean);
- sheet(`<h2>${esc(p.title)}</h2><div class="card">${ls.map((l,i)=>`<div class="p${l[1]=='x'?' done':''}"><span class="ck" data-li="${id}:${i}"></span><div class="tt">${esc(l.slice(4))}</div><button data-ld="${id}:${i}">✕</button></div>`).join('')}<input id="nl" placeholder="${p.kind=='goal'?'Adım':'Madde'} ekle, Enter"></div><div class="card"><button class="row red" data-pa="pdl" data-i="${id}">Sil</button></div>`)}
+ sheet(`<h2>${esc(p.title)}</h2><div class="card">${ls.map((l,i)=>`<div class="p${l[1]=='x'?' done':''}"><span class="ck" data-li="${id}:${i}"></span><div class="tt">${esc(l.slice(4))}</div><button data-ld="${id}:${i}">✕</button></div>`).join('')}<input id="nl" placeholder="${p.kind=='goal'?'Adım':'Madde'} ekle, Enter"></div>${p.kind=='goal'?linkedHtml(p):''}<div class="card"><button class="row red" data-pa="pdl" data-i="${id}">Sil</button></div>`)}
 function lineOp(ref,op){const [id,i]=ref.split(':'),p=plans.find(x=>x.id==id),l=(p.body||'').split('\n').filter(Boolean);
  if(op=='t')l[i]=(l[i][1]=='x'?'[ ] ':'[x] ')+l[i].slice(4);else l.splice(+i,1);p.body=l.join('\n')||null;save(p);listSheet(id)}
 const sInRange=(a,b)=>plans.filter(p=>p.kind=='season'&&p.day<=b&&(p.end_day||p.day)>=a);
 const sChips=(a,b)=>{const s=sInRange(a,b);return s.length?`<div class="strip">${s.map(p=>`<span class="chip" style="background:${p.color||'#0a84ff'}30;color:${p.color||'#0a84ff'}" data-id="${p.id}">${esc(p.title)} · ${fmtD(p.day)}–${fmtD(p.end_day||p.day)}</span>`).join('')}</div>`:''};
 const sameP=(d,ds,sc)=>sc=='year'?d.slice(0,4)==ds.slice(0,4):sc=='month'?d.slice(0,7)==ds.slice(0,7):ymd(mon(dt(d)))==ymd(mon(dt(ds)));
 const gBand=(sc,ds)=>{const a=plans.filter(p=>p.kind=='goal'&&p.day&&(p.props||{}).scope==sc&&sameP(p.day,ds,sc));
- return a.length?`<h2>Hedefler</h2><div class="card">${a.map(g=>{const l=(g.body||'').split('\n').filter(Boolean),n=l.filter(x=>x[1]=='x').length,q=l.length?Math.round(n/l.length*100):0;return `<div class="p" data-id="${g.id}"><span class="rg" style="--p:${q}"><b>${q}</b></span><div class="tt">${esc(g.title)}<small>${n}/${l.length} adım</small></div></div>`}).join('')}</div>`:''};
+ return a.length?`<h2>Hedefler</h2><div class="card">${a.map(g=>{const {n,t,s,k}=gp(g),q=t?Math.round(n/t*100):0;return `<div class="p" data-id="${g.id}"><span class="rg" style="--p:${q}"><b>${q}</b></span><div class="tt">${esc(g.title)}<small>${n}/${t} · ${s} adım, ${k} plan</small></div></div>`}).join('')}</div>`:''};
 const _vy=vYear,_vm=vMonth,_vw=vWeek,_vdy=vDay;
 vYear=function(){const y=V.d.getFullYear();const h=_vy().replace(/(<i class="dot[^"]*" style="[^"]*)(" data-g="day:(\d{4}-\d{2}-\d{2})")/g,(m,a,b,d)=>{const s=sInRange(d,d)[0];return a+(s?`;box-shadow:0 0 0 2px ${s.color||'#0a84ff'}`:'')+b});
  return h.replace('</h1>','</h1>'+sChips(y+'-01-01',y+'-12-31')+gBand('year',ymd(V.d)))};
@@ -306,7 +306,7 @@ $('#qf').insertAdjacentHTML('afterbegin','<button type="button" id="pl" aria-lab
 document.addEventListener('click',e=>{const t=e.target;let x;
  if(x=t.closest('[data-li]')){e.stopImmediatePropagation();lineOp(x.dataset.li,'t')}
  else if(x=t.closest('[data-ld]')){e.stopImmediatePropagation();lineOp(x.dataset.ld,'d')}
- else if((x=t.closest('[data-id]'))&&Date.now()-LD>300){const p=plans.find(y=>y.id==x.dataset.id);if(p&&['list','goal','season'].includes(p.kind)){e.stopImmediatePropagation();listSheet(p.id)}}
+ else if((x=t.closest('[data-id]'))&&Date.now()-LD>300&&!SELM){const p=plans.find(y=>y.id==x.dataset.id);if(p&&['list','goal','season','bday','anniv'].includes(p.kind)){e.stopImmediatePropagation();listSheet(p.id)}}
  else if(x=t.closest('[data-tp2]')){const k=x.dataset.tp2,v=$('#pi')?$('#pi').value:'';close();newItem(k,ymd(V.d),'todo',v)}
  else if(t.closest('#pl'))addPal()},true);
 document.addEventListener('keydown',e=>{const tg=document.activeElement.tagName;
@@ -315,16 +315,16 @@ document.addEventListener('keydown',e=>{const tg=document.activeElement.tagName;
  else if(e.key=='Enter'&&e.target.id=='nl'&&e.target.value.trim()){const p=plans.find(x=>x.id==LID);p.body=((p.body||'')+'\n[ ] '+e.target.value.trim()).trim();save(p);listSheet(LID)}});
 const _pq=pact;
 pact=async function(a,i){
- if(a=='nk'){const [k,s]=i.split('|'),b=($('#nb')?$('#nb').value:'').trim(),r={id:crypto.randomUUID(),title:$('#ni').value.trim(),day:$('#nd').value||null,time:k=='plan'?($('#nt').value||null):null,weight:1,done:false,status:s,kind:k,pos:9999,remind_min:$('#erm')?+$('#erm').value:null,repeat:$('#erp')?($('#erp').value||null):null,area:$('#na')?($('#na').value||null):null,icon:$('#eic')?($('#eic').value||null):null,
+ if(a=='nk'){const [k,s]=i.split('|'),b=($('#nb')?$('#nb').value:'').trim(),r={id:crypto.randomUUID(),title:$('#ni').value.trim(),day:$('#nd').value||null,time:k=='plan'||k=='remind'?($('#nt').value||null):null,weight:1,done:false,status:s,kind:k,pos:9999,remind_min:k=='remind'?0:$('#erm')?+$('#erm').value:null,repeat:$('#erp')?($('#erp').value||null):null,area:$('#na')?($('#na').value||null):null,icon:$('#eic')?($('#eic').value||null):null,est:$('#ees')?(+$('#ees').value||null):null,goal_id:$('#egl')?($('#egl').value||null):null,
    body:k=='note'?(b||null):(k=='list'||k=='goal')?(b.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>'[ ] '+x).join('\n')||null):null};
-  if(k=='goal')r.props={scope:$('#ns').value};if(k=='season'){r.end_day=$('#ne').value||r.day;r.color=$('#nc').value}
+  if(k=='goal')r.props={scope:$('#ns').value};if(k=='habit')r.props={log:[]};if(k=='season'){r.end_day=$('#ne').value||r.day;r.color=$('#nc').value}
   if(!r.title)return;close();save(r)}
  else if(a=='pdl'){softDel(i);close()}
  else return _pq(a,i)};
 
 /* ---- takvim için kendi sürükle-bırak (Sortable yerine) ---- */
 let DG=null;
-const zone=(x,y)=>{const el=document.elementFromPoint(x,y),c=el&&el.closest('.wc,.ln-w,.col');return c?c.querySelector('.wl,.ln,.list'):el&&el.closest('.pool,.hr')};
+const zone=(x,y)=>{const el=document.elementFromPoint(x,y),c=el&&el.closest('.wc,.ln-w,.col');return c?c.querySelector('.wl,.ln,.list'):el&&el.closest('.pool,.hr,.c,.dot')};
 function dgStart(c,x,y){const r=c.getBoundingClientRect(),g=c.cloneNode(true);g.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;margin:0;pointer-events:none;z-index:9999;opacity:.92;box-shadow:0 8px 24px rgba(0,0,0,.35)`;
  document.body.appendChild(g);DG.g=g;DG.ox=x-r.left;DG.oy=y-r.top;DG.on=true;if(!DG.tile)c.classList.add('gh');document.body.classList.add('dragging')}
 function dgMove(x,y){DG.g.style.left=x-DG.ox+'px';DG.g.style.top=y-DG.oy+'px';
@@ -333,17 +333,18 @@ function dgMove(x,y){DG.g.style.left=x-DG.ox+'px';DG.g.style.top=y-DG.oy+'px';
  if(y<80)scrollBy(0,-12);else if(y>innerHeight-110)scrollBy(0,12)}
 function dgEnd(x,y,cancel){DG.g.remove();document.body.classList.remove('dragging');document.querySelectorAll('.over').forEach(e=>e.classList.remove('over'));
  const c=DG.c,tile=DG.tile,z=!cancel&&zone(x,y);c.classList.remove('gh');DG=null;if(!z)return;
- if(tile)return newItem(tile,z.dataset.d!==undefined?z.dataset.d:ymd(V.d),z.dataset.s||'todo');
+ if(tile)return newItem(tile,z.dataset.g?z.dataset.g.split(':')[1]:z.dataset.d!==undefined?z.dataset.d:ymd(V.d),z.dataset.s||'todo');
  const from=c.parentElement,nx=[...z.children].filter(k=>k!==c&&k.classList.contains(c.classList.contains('tk')?'tk':'pc')).find(k=>{const r=k.getBoundingClientRect();return y<r.top+r.height/2});
  nx?z.insertBefore(c,nx):z.appendChild(c);c.classList.contains('tk')?dropped({item:c,to:z,from}):dropPlan({item:c,to:z,from},z.dataset.h!==undefined?'t':z.dataset.b!==undefined?'b':z.classList.contains('ln')?'s':'w')}
-document.addEventListener('pointerdown',e=>{if(e.pointerType=='mouse'&&e.button!==0)return;const c=e.target.closest('.pc,.tile[data-tile],.tk');if(!c||e.target.closest('[data-st],[data-nx],[data-tk]')||(c.classList.contains('tk')&&!own(cur())))return;
+document.addEventListener('pointerdown',e=>{if(SELM||(e.pointerType=='mouse'&&e.button!==0))return;const c=e.target.closest('.pc,.tile[data-tile],.tk');if(!c||e.target.closest('[data-st],[data-nx],[data-tk]')||(c.classList.contains('tk')&&!own(cur())))return;
  DG={c,tile:c.dataset.tile||null,x:e.clientX,y:e.clientY,on:false,touch:e.pointerType!='mouse',id:e.pointerId};
  if(DG.touch)DG.t=setTimeout(()=>{if(DG&&!DG.on)dgStart(c,DG.x,DG.y)},180)});
 document.addEventListener('pointermove',e=>{if(!DG||e.pointerId!==DG.id)return;
- if(!DG.on){if(Math.hypot(e.clientX-DG.x,e.clientY-DG.y)<=(DG.touch?10:5))return;if(DG.touch){clearTimeout(DG.t);DG=null;return}dgStart(DG.c,DG.x,DG.y)}
+ if(!DG.on){if(Math.hypot(e.clientX-DG.x,e.clientY-DG.y)<=(DG.touch?10:5))return;if(DG.touch){const dx=e.clientX-DG.x,dy=e.clientY-DG.y;clearTimeout(DG.t);if(DG.c.classList.contains('pc')&&Math.abs(dx)>Math.abs(dy)*1.4){DG.sw=true;DG.on=true;swStart()}else{DG=null;return}}else dgStart(DG.c,DG.x,DG.y)}
+ if(DG.sw){swMove(e.clientX-DG.x);return}
  dgMove(e.clientX,e.clientY)});
-document.addEventListener('pointerup',e=>{if(!DG||e.pointerId!==DG.id)return;clearTimeout(DG.t);if(DG.on){LD=Date.now();dgEnd(e.clientX,e.clientY,false)}else DG=null});
-document.addEventListener('pointercancel',()=>{if(DG&&DG.on)dgEnd(0,0,true);else DG=null});
+document.addEventListener('pointerup',e=>{if(!DG||e.pointerId!==DG.id)return;clearTimeout(DG.t);if(DG.on){LD=Date.now();DG.sw?swEnd(e.clientX-DG.x):dgEnd(e.clientX,e.clientY,false)}else DG=null});
+document.addEventListener('pointercancel',()=>{if(DG&&DG.on)DG.sw?swEnd(0,true):dgEnd(0,0,true);else DG=null});
 document.addEventListener('touchmove',e=>{if(DG&&DG.on)e.preventDefault()},{passive:false});
 
 /* ===== büyük paket: geri al, çöp, çevrimdışı, tekrar, bantlar, çizelge, özetler, paylaşım... ===== */
@@ -365,8 +366,8 @@ const OQ=()=>JSON.parse(localStorage.getItem('oq')||'[]');
 function offq(a,e){if(!navigator.onLine||/fetch|network|load failed/i.test(e.message)){localStorage.setItem('oq',JSON.stringify(OQ().filter(x=>!a.some(y=>y.id==x.id)).concat(a)));toast('Çevrimdışı: bağlanınca gönderilecek')}else alert(e.message)}
 async function flushQ(){const q=OQ();if(!q.length||!navigator.onLine)return;const r=await sb.from('plans').upsert(q);if(!r.error)localStorage.removeItem('oq')}
 addEventListener('online',flushQ);
-const _l2=load;load=async function(){await flushQ();await _l2();wxLoad();sb.from('plans').delete().lt('deleted_at',new Date(Date.now()-30*864e5).toISOString()).then(()=>{})};
-function hashArea(p){const m=(p.title||'').match(/(^|\s)#([\wğüşöçıİĞÜŞÖÇ]+)/);if(m&&!p.area){p.area=m[2];p.title=p.title.replace(m[0],'').trim()}}
+const _l2=load;load=async function(){await flushQ();if(window.flushOff)await window.flushOff();await _l2();wxLoad();sb.from('plans').delete().lt('deleted_at',new Date(Date.now()-30*864e5).toISOString()).then(()=>{})};
+function hashArea(p){const w=(p.title||'').match(/(^|\s)@([\wğüşöçıİĞÜŞÖÇ]+)/);if(w&&!p.who){p.who=w[2];p.title=p.title.replace(w[0],'').trim()}const m=(p.title||'').match(/(^|\s)#([\wğüşöçıİĞÜŞÖÇ]+)/);if(m&&!p.area){p.area=m[2];p.title=p.title.replace(m[0],'').trim()}}
 function spawn(p){if(!p.repeat||!p.done||!p.day)return;const d=dt(p.day);if(p.repeat=='daily')d.setDate(d.getDate()+1);else if(p.repeat=='weekly')d.setDate(d.getDate()+7);else if(p.repeat=='monthly')d.setMonth(d.getMonth()+1);else{do d.setDate(d.getDate()+1);while([0,6].includes(d.getDay()))}
  const n={...p,id:crypto.randomUUID(),day:ymd(d),done:false,status:'todo',started_at:null,spent:0,moved:0};delete n.created_at;p.repeat=null;n.remind_at=remind(n);n.notified=false;plans.push(n);sb.from('plans').insert(n).then(r=>r.error&&offq([n],r.error))}
 const bandOf=p=>p.time?(p.time<'12'?'sabah':p.time<'18'?'ogle':'aksam'):(p.band||'');
@@ -389,15 +390,15 @@ vDay=function(){const ds=ymd(V.d),a=plans.filter(p=>p.day===ds&&isCard(p)),dn=a.
  if(DM=='bant')h=h.replace(/<!--L-->[\s\S]*<!--\/L-->/,bandsHtml(a));else if(DM=='saat')h=h.replace(/<!--L-->[\s\S]*<!--\/L-->/,hoursHtml(a));
  return h.replace('</h1>',`</h1><div class="dayhead"><span class="rg${q==100&&a.length?' cele':''}" style="--p:${q}"><b>${q}%</b></span><div class="tt">${dn}/${a.length} tamam<small>${HOL[ds]?esc(HOL[ds])+wxChip(ds):wxChip(ds).slice(3)}</small></div></div><div class="strip">${[['serit','Şeritler'],['bant','Bantlar'],['saat','Çizelge']].map(([k,n])=>`<span class="chip${DM==k?' on':''}" data-dm="${k}">${n}</span>`).join('')}<span class="chip" data-pa="rt">Rutin ekle</span></div>${warn(a)}${radar(ds)}`)};
 vYear=function(){let h=_vy3();if(YM=='focus')h=h.replace(/style="--a:[^";]*([^"]*)" data-g="day:(\d{4}-\d{2}-\d{2})"/g,(m,r,d)=>`style="--a:${Math.min(1,plans.filter(p=>p.day===d).reduce((s,p)=>s+sp(p),0)/120)}${r}" data-g="day:${d}"`);const y=V.d.getFullYear();
- return h.replace('<h1>','<h1 class="hb">').replace('</h1>','</h1>'+hChips(y+'-01-01',y+'-12-31')+`<div class="strip">${[['load','Yoğunluk'],['focus','Odak süresi']].map(([k,n])=>`<span class="chip${YM==k?' on':''}" data-ym="${k}">${n}</span>`).join('')}</div>`)};
+ return h.replace('<h1>','<h1 class="hb">').replace('</h1>','</h1>'+hChips(y+'-01-01',y+'-12-31')+`<div class="strip">${[['load','Yoğunluk'],['focus','Odak süresi']].map(([k,n])=>`<span class="chip${YM==k?' on':''}" data-ym="${k}">${n}</span>`).join('')}<span class="chip" data-pa="sy">Yıl özeti</span></div>`)};
 vMonth=function(){const y=V.d.getFullYear(),m=V.d.getMonth();return _vm3().replace('<h1>','<h1 class="hb">'+MEM[m]+' ').replace('</h1>','</h1>'+hChips(`${y}-${p2(m+1)}-01`,`${y}-${p2(m+1)}-31`)+'<div class="strip"><span class="chip" data-pa="sm">Ay özeti</span></div>')};
 vWeek=function(){const s=mon(V.d),n=new Date(),sun=n.getDay()==0&&n.getHours()>=18&&localStorage.getItem('rvw')!=ymd(mon(n));
- return _vw3().replace('<h1>','<h1 class="hb">').replace('</h1>','</h1>'+hChips(ymd(s),ymd(add(s,6)))+`<div class="strip"><span class="chip${sun?' on':''}" data-pa="rv">${sun?'Pazar akşamı: haftanı değerlendir':'Haftalık değerlendirme'}</span><span class="chip" data-pa="sw">Hafta özeti</span></div>`)};
+ return _vw3().replace('<h1>','<h1 class="hb">').replace('</h1>','</h1>'+hChips(ymd(s),ymd(add(s,6)))+`<div class="strip"><span class="chip${sun?' on':''}" data-pa="rv">${sun?'Pazar akşamı: haftanı değerlendir':'Haftalık değerlendirme'}</span><span class="chip" data-pa="sw">Hafta özeti</span></div>`+capChip(s)+fltChips())};
 function badge(){const n=plans.filter(p=>p.day===TODAY()&&!p.done&&isCard(p)).length;if(navigator.setAppBadge)(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{})}
 function summary(a,b,title){const ps=plans.filter(p=>p.day&&p.day>=a&&p.day<=b&&isCard(p)),dn=ps.filter(p=>p.done),min=ps.reduce((s,p)=>s+sp(p),0),moved=ps.filter(p=>(p.moved||0)>0).length,days={},ar={};
  dn.forEach(p=>{days[p.day]=(days[p.day]||0)+1;const k=p.area||'Diğer';ar[k]=(ar[k]||0)+1});const best=Object.entries(days).sort((x,y)=>y[1]-x[1])[0],ks=Object.keys(ar),tot=dn.length||1;let c=0;
  const grad=ks.map((k,i)=>{const s=c;c+=ar[k]/tot*100;return `${COL[i%COL.length]} ${s}% ${c}%`}).join(',');
- sheet(`<h2>${title}</h2><div class="card"><div class="p"><div class="tt">Tamamlanan<small>${dn.length}/${ps.length} iş</small></div></div><div class="p"><div class="tt">Odaklanma<small>${Math.floor(min/60)} sa ${min%60} dk</small></div></div>${best?`<div class="p"><div class="tt">En verimli gün<small>${fmtD(best[0])} · ${best[1]} iş</small></div></div>`:''}<div class="p"><div class="tt">Ertelenen<small>${moved} iş en az bir kez kaydı</small></div></div></div>${ks.length?`<h2>Hayat dengesi (alan etiketi için #iş, #spor yaz)</h2><div class="card"><div class="p"><span class="donut" style="background:conic-gradient(${grad})"></span><div class="tt">${ks.map((k,i)=>`<small><i class="sw" style="background:${COL[i%COL.length]}"></i>${esc(k)} · %${Math.round(ar[k]/tot*100)}</small>`).join('')}</div></div></div>`:''}`)}
+ sheet(`<h2>${title}</h2><div class="card"><div class="p"><div class="tt">Tamamlanan<small>${dn.length}/${ps.length} iş</small></div></div><div class="p"><div class="tt">Odaklanma<small>${Math.floor(min/60)} sa ${min%60} dk</small></div></div>${estTxt(dn)}${bestHours(dn)}${best?`<div class="p"><div class="tt">En verimli gün<small>${fmtD(best[0])} · ${best[1]} iş</small></div></div>`:''}<div class="p"><div class="tt">Ertelenen<small>${moved} iş en az bir kez kaydı</small></div></div></div>${ks.length?`<h2>Hayat dengesi (alan etiketi için #iş, #spor yaz)</h2><div class="card"><div class="p"><span class="donut" style="background:conic-gradient(${grad})"></span><div class="tt">${ks.map((k,i)=>`<small><i class="sw" style="background:${COL[i%COL.length]}"></i>${esc(k)} · %${Math.round(ar[k]/tot*100)}</small>`).join('')}</div></div></div>`:''}`)}
 function review(){const s=mon(V.d),a=ymd(s),b=ymd(add(s,6)),u=plans.filter(p=>p.day&&p.day>=a&&p.day<=b&&!p.done&&isCard(p));localStorage.setItem('rvw',a);
  sheet(`<h2>Haftalık değerlendirme</h2><p class="hint">Bitmeyen ${u.length} iş var. Her biri için karar ver.</p><div class="card">${u.map(p=>`<div class="p"><div class="tt">${esc(p.title)}<small>${fmtD(p.day)}</small></div><button data-rv="${p.id}|next">Yeni hafta</button><button data-rv="${p.id}|pool">Havuz</button><button data-rv="${p.id}|done">Bitti</button></div>`).join('')||'<div class="row"><small>Hepsi tamam</small></div>'}</div>${u.length?'<button class="big" data-pa="rva">Hepsini yeni haftaya geçir</button>':''}<div class="card" style="margin-top:12px"><button class="row" data-pa="sw">Hafta özetini gör</button></div>`)}
 function rtSheet(){const r=TPLS.filter(t=>t.kind=='routine');sheet(`<h2>Rutin günler</h2><div class="card">${r.map(t=>`<div class="p"><div class="tt">${esc(t.name)}<small>${t.tasks.length} iş</small></div><button data-ra="${t.id}">Bu güne ekle</button></div>`).join('')||'<div class="row"><small>Henüz rutin yok</small></div>'}</div><div class="card"><button class="row" data-pa="rsv">Bu günü rutin olarak kaydet</button></div>`)}
@@ -449,23 +450,23 @@ const PACKS={'Ay renkleri':'','Okyanus':'#0a7fa8','Orman':'#2e8b57','Gün batım
 const iconSel=p=>`<select id="eic"><option value="">Simge yok</option>${ICONS.map(i=>`<option${p.icon==i?' selected':''}>${i}</option>`).join('')}</select>`;
 let LP=0,LM=null;
 theme=function(){document.documentElement.style.setProperty('--ac',PACKS[localStorage.getItem('pack')||'']||MC[(P=='cal'?V.d:new Date()).getMonth()])};
-function applyLook(){const h=new Date().getHours();document.body.classList.toggle('dense',localStorage.getItem('dense')=='1');document.body.classList.toggle('eve',localStorage.getItem('eve')!='0'&&(h>=19||h<6))}
+function applyLook(){const h=new Date().getHours(),B=document.body.classList;B.toggle('snow',[11,0,1].includes(new Date().getMonth())&&localStorage.getItem('snow')!='0');B.toggle('cb',localStorage.getItem('cb')=='1');document.documentElement.style.setProperty('--fm',localStorage.getItem('fm')||1);document.body.classList.toggle('dense',localStorage.getItem('dense')=='1');document.body.classList.toggle('eve',localStorage.getItem('eve')!='0'&&(h>=19||h<6))}
 function nowBar(){const p=plans.find(x=>stOf(x)=='doing'),n=$('#nowbar');if(!n)return;n.style.display=p?'block':'none';if(p)n.innerHTML=`<button class="pill" data-nw="${p.id}">▶ Şimdi: ${esc(p.title)} · ${sp(p)} dk</button>`}
 function tabsOn(){document.querySelectorAll('#tabs [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab==(P=='cal'?V.l:'plan')))}
 $('#bar').insertAdjacentHTML('afterbegin','<div id="nowbar"></div>');
 $('#bar').insertAdjacentHTML('beforeend','<nav id="tabs">'+[['day','Bugün','🌤️'],['week','Hafta','🗓️'],['month','Ay','📅'],['year','Yıl','🧭'],['plan','Planlar','📁']].map(([k,n,i])=>`<button data-tab="${k}"><b>${i}</b>${n}</button>`).join('')+'</nav>');
 const streak=()=>{const s=new Set(plans.filter(p=>p.done&&p.day).map(p=>p.day));let d=new Date(),n=0;if(!s.has(ymd(d)))d=add(d,-1);while(s.has(ymd(d))){n++;d=add(d,-1)}return n};
-function hero(ds,a){const isT=ds===TODAY(),hr=new Date().getHours(),dn=a.filter(p=>p.done).length,rest=a.length-dn,q=a.length?Math.round(dn/a.length*100):0,dd=dt(ds),np=plans.find(x=>stOf(x)=='doing'),hol=HOL[ds],st=streak();
+function hero(ds,a){const tp=a.find(p=>p.top&&!p.done),isT=ds===TODAY(),hr=new Date().getHours(),dn=a.filter(p=>p.done).length,rest=a.length-dn,q=a.length?Math.round(dn/a.length*100):0,dd=dt(ds),np=plans.find(x=>stOf(x)=='doing'),hol=HOL[ds],st=streak();
  const gr=hr<6?'İyi geceler':hr<12?'Günaydın':hr<18?'İyi günler':'İyi akşamlar',sub=!a.length?'bugün boş':rest?`${rest} iş seni bekliyor`:`hepsi tamam, ${dn} iş bitirdin`;
- return `<div class="hero"><div class="hr1"><div><div class="hs">${isT?gr+', '+sub:GN[dd.getDay()]}</div><div class="hd">${dd.getDate()} ${AY[dd.getMonth()]}</div><div class="hs">${isT?GN[dd.getDay()]:''}${wxChip(ds)}${hol?' · '+(hol.includes('Bayram')&&!hol.includes('arife')?'🎉 ':'')+esc(hol):''}${st>=2&&isT?' · 🔥 '+st+' gün üst üste':''}</div></div><span class="rg" data-p="${q}" style="--p:${q}"><b>${q}%</b></span></div>${np?`<div class="pill2">▶ Şimdi: ${esc(np.title)} · ${sp(np)} dk</div>`:''}${isT&&(hr>=18||(a.length&&!rest))?'<button class="hbtn" data-pa="clo">Günü kapat</button>':''}</div>`}
-const _vd4=vDay;vDay=function(){const ds=ymd(V.d),a=plans.filter(p=>p.day===ds&&isCard(p));return _vd4().replace(/<h1>[\s\S]*?<\/h1>/,hero(ds,a)).replace(/<div class="dayhead">[\s\S]*?<\/div><\/div>/,'')};
+ return `<div class="hero"><div class="hr1"><div><div class="hs">${isT?gr+', '+sub:GN[dd.getDay()]}</div><div class="hd">${dd.getDate()} ${AY[dd.getMonth()]}</div><div class="hs">${isT?GN[dd.getDay()]:''}${wxChip(ds)}${hol?' · '+(hol.includes('Bayram')&&!hol.includes('arife')?'🎉 ':'')+esc(hol):''}${st>=2&&isT?' · 🔥 '+st+' gün üst üste':''}</div></div><span class="rg" data-p="${q}" style="--p:${q}"><b>${q}%</b></span></div>${np?`<div class="pill2" data-fm="${np.id}">▶ Şimdi: ${esc(np.title)} · ${sp(np)} dk · odak moduna geç</div>`:''}${isT&&(hr>=18||(a.length&&!rest))?'<button class="hbtn" data-pa="clo">Günü kapat</button>':''}${isT&&rest&&hr<18?(tp?`<div class="pill2">★ İlk iş: ${esc(tp.title)}</div>`:'<button class="hbtn" data-pa="top">İlk işini seç</button><button class="hbtn" data-pa="sug">Bugünü öner</button>'):''}</div>`}
+const _vd4=vDay;vDay=function(){const ds=ymd(V.d),a=plans.filter(p=>p.day===ds&&isCard(p));return _vd4().replace(/<h1>[\s\S]*?<\/h1>/,hero(ds,a)+hbits(ds)+fltChips()).replace(/<div class="dayhead">[\s\S]*?<\/div><\/div>/,'')};
 function polish(){document.querySelectorAll('.hero .rg').forEach(el=>{const to=+el.dataset.p,from=LP;LP=to;if(to==from)return;let t0;const f=ts=>{t0=t0||ts;const k=Math.min(1,(ts-t0)/700),v=Math.round(from+(to-from)*(1-Math.pow(1-k,3)));el.style.setProperty('--p',v);el.firstChild.textContent=v+'%';if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f);if(to==100&&from<100)burst()});
  if(LM){const e=document.querySelector(`.pc[data-id="${LM}"]`);if(e)e.classList.add('settle');LM=null}}
 function burst(){for(let i=0;i<18;i++){const s=document.createElement('span');s.textContent=['🎉','✨','🎊'][i%3];s.className='cf';s.style.cssText=`left:${Math.random()*100}vw;animation-delay:${Math.random()*.4}s`;document.body.appendChild(s);setTimeout(()=>s.remove(),2300)}}
 function closeDay(){const ds=TODAY(),a=plans.filter(p=>p.day===ds&&isCard(p)),dn=a.filter(p=>p.done),min=a.reduce((s,p)=>s+sp(p),0),tm=plans.filter(p=>p.day===ymd(add(new Date(),1))&&isCard(p)).sort(by)[0],rest=a.length-dn.length;
  sheet(`<h2>Günü kapat</h2><div class="card"><div class="p"><div class="tt">Bugün ${dn.length} iş tamamladın<small>${dn.slice(0,5).map(p=>esc(p.title)).join(', ')}</small></div></div><div class="p"><div class="tt">Odaklanma<small>${Math.floor(min/60)} sa ${min%60} dk</small></div></div><div class="p"><div class="tt">Yarının ilk işi<small>${tm?esc(tm.title):'Henüz plan yok'}</small></div></div></div>${rest?`<button class="big" data-pa="roll" data-i="${ds}">Kalan ${rest} işi yarına kaydır</button>`:''}`)}
 function lookSheet(){const pk=localStorage.getItem('pack')||'Ay renkleri',dn=localStorage.getItem('dense')=='1',ev=localStorage.getItem('eve')!='0';
- sheet(`<h2>Görünüm</h2><h2>Tema</h2><div class="strip">${Object.keys(PACKS).map(k=>`<span class="chip${pk==k?' on':''}" data-pk2="${k}">${k}</span>`).join('')}</div><h2>Kart yoğunluğu</h2><div class="strip"><span class="chip${dn?'':' on'}" data-dn="0">Rahat</span><span class="chip${dn?' on':''}" data-dn="1">Sıkı</span></div><h2>Akşam teması</h2><div class="strip"><span class="chip${ev?' on':''}" data-ev="1">Otomatik</span><span class="chip${ev?'':' on'}" data-ev="0">Kapalı</span></div>`)}
+ sheet(`<h2>Görünüm</h2><h2>Tema</h2><div class="strip">${Object.keys(PACKS).map(k=>`<span class="chip${pk==k?' on':''}" data-pk2="${k}">${k}</span>`).join('')}</div><h2>Kart yoğunluğu</h2><div class="strip"><span class="chip${dn?'':' on'}" data-dn="0">Rahat</span><span class="chip${dn?' on':''}" data-dn="1">Sıkı</span></div><h2>Akşam teması</h2><div class="strip"><span class="chip${ev?' on':''}" data-ev="1">Otomatik</span><span class="chip${ev?'':' on'}" data-ev="0">Kapalı</span></div><h2>Yazı boyutu</h2><div class="strip">${[['0.9','Küçük'],['1','Normal'],['1.15','Büyük'],['1.3','Çok büyük']].map(([k,n])=>`<span class="chip${(localStorage.getItem('fm')||'1')==k?' on':''}" data-fs="${k}">${n}</span>`).join('')}</div><h2>Renk körlüğü uyumu</h2><div class="strip"><span class="chip${localStorage.getItem('cb')=='1'?' on':''}" data-cb="1">Açık</span><span class="chip${localStorage.getItem('cb')=='1'?'':' on'}" data-cb="0">Kapalı</span></div><h2>Kış kar taneleri</h2><div class="strip"><span class="chip${localStorage.getItem('snow')!='0'?' on':''}" data-sn="1">Açık</span><span class="chip${localStorage.getItem('snow')=='0'?' on':''}" data-sn="0">Kapalı</span></div><h2>Planlama</h2><div class="card"><button class="row" data-pa="cap">Haftalık kapasite: ${localStorage.getItem('cap')||30} saat</button></div>`)}
 document.addEventListener('click',e=>{const t=e.target;let x;
  if(x=t.closest('[data-tab]')){e.stopImmediatePropagation();const k=x.dataset.tab;if(k=='plan'){document.body.classList.add('sd');return}P='cal';if(k=='day')V={l:'day',d:new Date()};else V.l=k;render(1)}
  else if(x=t.closest('[data-nw]')){e.stopImmediatePropagation();const p=plans.find(y=>y.id==x.dataset.nw);P='cal';V={l:'day',d:dt(p.day||TODAY())};render(1)}
@@ -474,3 +475,129 @@ document.addEventListener('click',e=>{const t=e.target;let x;
  else if(x=t.closest('[data-ev]')){e.stopImmediatePropagation();localStorage.setItem('eve',x.dataset.ev);applyLook();lookSheet()}},true);
 const _p6=pact;
 pact=async function(a,i){if(a=='clo')closeDay();else if(a=='look')lookSheet();else return _p6(a,i)};
+
+/* ===== bildirim, süzgeç, seçim, erişilebilirlik, alışkanlık, odak, ics ===== */
+const IC={day:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',week:'<rect x="3" y="4" width="4" height="16" rx="1"/><rect x="10" y="4" width="4" height="16" rx="1"/><rect x="17" y="4" width="4" height="16" rx="1"/>',month:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',year:[6,12,18].flatMap(y=>[6,12,18].map(x=>`<circle cx="${x}" cy="${y}" r="1.5"/>`)).join(''),plan:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'};
+document.querySelectorAll('#tabs [data-tab] b').forEach(b=>b.innerHTML=`<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[b.parentElement.dataset.tab]}</svg>`);
+ICON.habit='🔁';NAME.habit='Alışkanlık';ICON.remind='🔔';NAME.remind='Hatırlatma';ORDER.day.push('habit','remind');ORDER.week.push('habit','remind');ORDER.month.push('habit','remind');ORDER.year.push('habit','remind');
+let FLT=localStorage.getItem('flt')||'',SELM=false,FID=null,FT=null,WL=null,PF={quiet_start:23,quiet_end:7,morning:true,evening:true,weekly:true};const SEL=new Set();
+const fltOk=p=>!HID.has(p.area||'')&&(!FLT||(FLT=='open'?!p.done:p.area==FLT));
+const fltChips=()=>`<div class="strip">${[['','Tümü'],['open','Bitmeyenler'],...AREAS.map(a=>[a,a])].map(([k,n])=>`<span class="chip${FLT==k?' on':''}" data-fl="${k}">${n}</span>`).join('')}<span class="chip${SELM?' on':''}" data-sm="1">Seç</span><span class="chip${HID.size?' on':''}" data-pa="lay">Katmanlar${HID.size?' ('+HID.size+' gizli)':''}</span></div>`;
+const estSel=p=>`<select id="ees">${[[0,'Süre tahmini yok'],[15,'~15 dk'],[30,'~30 dk'],[45,'~45 dk'],[60,'~1 saat'],[90,'~1,5 saat'],[120,'~2 saat'],[180,'~3 saat']].map(([v,n])=>`<option value="${v}"${(p.est||0)==v?' selected':''}>${n}</option>`).join('')}</select>`;
+const hstreak=(L,ds)=>{const s=new Set(L);let d=dt(ds),n=0;if(!s.has(ds))d=add(d,-1);while(s.has(ymd(d))){n++;d=add(d,-1)}return n};
+const hbits=ds=>{const h=plans.filter(p=>p.kind=='habit'&&p.day<=ds);return h.length?`<div class="strip">${h.map(p=>{const L=(p.props||{}).log||[],on=L.includes(ds);return `<span class="chip${on?' on':''}" data-hb="${p.id}">${on?'✓':'○'} ${p.icon||''}${esc(p.title)} · 🔥${hstreak(L,ds)}</span>`}).join('')}</div>`:''};
+const capChip=s=>{const a=ymd(s),b=ymd(add(s,6)),m=plans.filter(p=>p.day&&p.day>=a&&p.day<=b&&isCard(p)&&!p.done).reduce((x,p)=>x+(p.est||30),0),cap=+(localStorage.getItem('cap')||30)*60,ly=plans.filter(p=>p.done&&p.day&&p.day>=ymd(add(s,-364))&&p.day<=ymd(add(s,-358))).length;
+ return `<div class="strip"><span class="chip${m>cap?' on':''}" data-pa="cap">Planlanan ${Math.floor(m/60)} sa ${m%60} dk / kapasite ${cap/60} sa${m>cap?' · taşıyor, bir işi havuza al':''}</span>${ly?`<span class="chip">Geçen yıl bu hafta ${ly} iş bitirmiştin</span>`:''}</div>`};
+const estTxt=d=>{const x=d.filter(p=>p.est&&p.spent),e=x.reduce((s,p)=>s+p.est,0),g=x.reduce((s,p)=>s+p.spent,0);return x.length?`<div class="p"><div class="tt">Tahmin ve gerçek süre<small>Tahmin ${e} dk, gerçek ${g} dk${g>e*1.2?' · işler tahminden uzun sürüyor':g<e*.8?' · tahminlerin geniş':''}</small></div></div>`:''};
+const bestHours=d=>{const h=Array(24).fill(0);d.filter(p=>p.time).forEach(p=>h[+p.time.slice(0,2)]++);let b=0,bi=-1;for(let i=0;i<23;i++)if(h[i]+h[i+1]>b){b=h[i]+h[i+1];bi=i}return b>=3?`<div class="p"><div class="tt">En verimli saatlerin<small>${p2(bi)}:00–${p2(bi+2)}:00 arası en çok işi bitiriyorsun</small></div></div>`:''};
+function topSheet(){const a=plans.filter(p=>p.day===TODAY()&&!p.done&&isCard(p));sheet(`<h2>Bugünün ilk işi hangisi?</h2><div class="card">${a.map(p=>`<div class="p"><div class="tt">${esc(p.title)}</div><button data-top="${p.id}">★ Seç</button></div>`).join('')||'<div class="row"><small>Bugün için açık iş yok</small></div>'}</div>`)}
+function sugSheet(){const t=TODAY(),c=[...plans.filter(p=>p.day&&p.day<t&&!p.done&&isCard(p)),...plans.filter(p=>!p.day&&!p.done&&isCard(p))].sort((a,b)=>(b.moved||0)-(a.moved||0)).slice(0,3);
+ sheet(`<h2>Bugün için öneri</h2><p class="hint">Gecikenler ve havuzdan, en çok kayanlar önce.</p><div class="card">${c.map(p=>`<div class="p"><div class="tt">${esc(p.title)}<small>${p.day?fmtD(p.day)+' · '+(p.moved||0)+' kez kaydı':'Havuz'}</small></div><button data-bm="${p.id}|${t}">Bugüne al</button></div>`).join('')||'<div class="row"><small>Önerilecek iş yok</small></div>'}</div>`)}
+pal=function(q){q=q.toLocaleLowerCase(TR);PAL=[{t:'Takvim',s:'Sayfa',g:'cal'},...PJ.map(p=>({t:p.name,s:'Plan',g:p.id})),...TK.map(t=>({t:t.title,s:(PJ.find(p=>p.id==t.project_id)||{}).name,g:t.project_id,k:t.id})),...plans.filter(p=>isCard(p)).map(p=>({t:p.title,s:(p.who?'@'+p.who+' · ':'')+(p.day?fmtD(p.day):'Havuz'),g:'cal',d:p.day,w:p.who||'',pid:p.id}))].filter(x=>x.t.toLocaleLowerCase(TR).includes(q)||(x.w||'').toLocaleLowerCase(TR).includes(q)).slice(0,8);
+ $('#cr').innerHTML=PAL.map((x,i)=>`<button class="row" data-pk="${i}">${esc(x.t)} <small>${esc(x.s||'')}</small></button>`).join('')||'<div class="row"><small>Sonuç yok</small></div>'};
+function selBar(){let b=$('#selbar');if(!b){$('#bar').insertAdjacentHTML('afterbegin','<div id="selbar"></div>');b=$('#selbar')}b.style.display=SELM?'flex':'none';const hh=SELM?`<span>${SEL.size} seçili</span>${[['tm','Yarına'],['pl','Havuz'],['dn','Bitti'],['dl','Sil'],['x','Kapat']].map(([k,n])=>`<button data-sa="${k}">${n}</button>`).join('')}`:'';if(b.dataset.h!==hh){b.dataset.h=hh;b.innerHTML=hh}}
+function selAct(k){const a=plans.filter(p=>SEL.has(p.id));if(k=='x'){SELM=false;SEL.clear();render();return}pushUndo();
+ if(k=='dl')a.forEach(p=>softDel(p.id));else{a.forEach(p=>{if(k=='tm'){p.day=ymd(add(dt(p.day||TODAY()),1));p.moved=(p.moved||0)+1}else if(k=='pl')p.day=null;else setStatus(p,'done');p.remind_at=remind(p);p.notified=false});cache();sb.from('plans').upsert(a).then(r=>r.error&&offq(a,r.error))}
+ SEL.clear();SELM=false;render()}
+function aria(){const L={out:'Geri',prev:'Önceki',next:'Sonraki',today:'Bugün',set:'Ayarlar'};document.querySelectorAll('button[data-a]').forEach(b=>{const l=L[b.dataset.a];if(l)b.setAttribute('aria-label',l)});
+ document.querySelectorAll('[data-pa=menu]').forEach(b=>b.setAttribute('aria-label','Plan listesi'));
+ document.querySelectorAll('.pc').forEach(c=>{c.setAttribute('role','button');c.tabIndex=0;const t=c.querySelector('.tt');c.setAttribute('aria-label',t?t.textContent:'')});
+ document.querySelectorAll('.dt').forEach(d=>{d.setAttribute('role','button');d.tabIndex=0;d.setAttribute('aria-label','Durumu değiştir')});
+ document.querySelectorAll('.chip[data-dm],.chip[data-fl],.chip[data-sm],.chip[data-hb],.chip[data-pa],.tile').forEach(t=>{t.setAttribute('role','button');t.tabIndex=0});
+ document.querySelectorAll('.tile').forEach(t=>t.setAttribute('aria-label',t.textContent+' ekle'));$('#q').setAttribute('aria-label','Hızlı ekle');
+ const s=$('#sh>div');if(s){s.setAttribute('role','dialog');s.setAttribute('aria-modal','true')}}
+let at;new MutationObserver(()=>{cancelAnimationFrame(at);at=requestAnimationFrame(()=>{aria();document.querySelectorAll('.pc').forEach(e=>e.classList.toggle('sel',SEL.has(e.dataset.id)));selBar()})}).observe(document.body,{childList:true,subtree:true});
+document.addEventListener('keydown',e=>{if((e.key=='Enter'||e.key==' ')&&e.target.matches&&e.target.matches('.pc,.dt,.chip,.tile')){e.preventDefault();e.target.click()}});
+function focusMode(id){const p=plans.find(x=>x.id==id);if(!p)return;FID=id;if(navigator.wakeLock)navigator.wakeLock.request('screen').then(l=>WL=l).catch(()=>{});
+ document.body.insertAdjacentHTML('beforeend',`<div id="focus"><div class="fc"><small>Odak modu</small><h1>${esc(p.title)}</h1><div id="ftm" class="ftm"></div><div class="strip" style="justify-content:center"><button class="big" data-fo="done" style="width:auto;padding:12px 28px">Bitir</button><button class="big" data-fo="x" style="width:auto;padding:12px 28px;background:#555">Kapat</button></div></div></div>`);
+ const tick=()=>{const s=Math.max(0,Math.round((Date.now()-new Date(p.started_at||Date.now()))/1e3))+(p.spent||0)*60;$('#ftm').textContent=p2(Math.floor(s/3600))+':'+p2(Math.floor(s%3600/60))+':'+p2(s%60)};tick();FT=setInterval(tick,1e3)}
+function endFocus(){clearInterval(FT);const f=$('#focus');if(f)f.remove();if(WL){WL.release();WL=null}}
+async function notifSheet(skip){if(!skip){const r=await sb.from('prefs').select('*').maybeSingle();if(r.data)PF=r.data}const hs=[...Array(24).keys()];
+ sheet(`<h2>Bildirim ayarları</h2><h2>Sessiz saatler</h2><div class="card"><select id="qs">${hs.map(h=>`<option value="${h}"${PF.quiet_start==h?' selected':''}>Başlangıç ${p2(h)}:00</option>`).join('')}</select><select id="qe">${hs.map(h=>`<option value="${h}"${PF.quiet_end==h?' selected':''}>Bitiş ${p2(h)}:00</option>`).join('')}</select></div><div class="strip">${[['morning','Sabah özeti'],['evening','Akşam kapanışı'],['weekly','Pazar değerlendirmesi']].map(([k,n])=>`<span class="chip${PF[k]?' on':''}" data-pf="${k}">${n}</span>`).join('')}</div><p class="hint">Sessiz saatte gelmesi gerekenler sabah gönderilir.</p>`)}
+const savePF=()=>sb.from('prefs').upsert({user_id:user.id,quiet_start:+PF.quiet_start,quiet_end:+PF.quiet_end,morning:PF.morning,evening:PF.evening,weekly:PF.weekly}).then(err);
+document.addEventListener('change',e=>{if(e.target.id=='qs'||e.target.id=='qe'){PF[e.target.id=='qs'?'quiet_start':'quiet_end']=+e.target.value;savePF()}});
+document.body.insertAdjacentHTML('beforeend','<input type="file" id="icsf" accept=".ics,text/calendar" hidden>');
+$('#icsf').onchange=async e=>{const f=e.target.files[0];if(!f)return;const tx=(await f.text()).replace(/\r?\n[ \t]/g,''),rows=[];
+ for(const b of tx.split('BEGIN:VEVENT').slice(1)){const s=(b.match(/SUMMARY[^:]*:(.*)/)||[])[1],d=b.match(/DTSTART[^:]*:(\d{8})(T(\d{2})(\d{2})\d{2}(Z)?)?/);if(!s||!d)continue;let day=`${d[1].slice(0,4)}-${d[1].slice(4,6)}-${d[1].slice(6,8)}`,tm=d[2]?`${d[3]}:${d[4]}`:null;
+  if(d[5]){const u=new Date(Date.UTC(+d[1].slice(0,4),+d[1].slice(4,6)-1,+d[1].slice(6,8),+d[3],+d[4]));day=ymd(u);tm=p2(u.getHours())+':'+p2(u.getMinutes())}
+  rows.push({id:crypto.randomUUID(),title:s.trim().replace(/\\,/g,','),day,time:tm,weight:1,done:false,status:'todo',kind:tm?'plan':'task',pos:9999})}
+ e.target.value='';if(!rows.length)return alert('Takvim dosyasında etkinlik bulunamadı.');pushUndo();rows.forEach(r=>{r.remind_at=remind(r);r.notified=false});plans.push(...rows);cache();close();render();sb.from('plans').insert(rows).then(r=>r.error&&offq(rows,r.error));toast(rows.length+' etkinlik eklendi')};
+function handleAct(){const q=new URLSearchParams(location.search);let h=false;
+ if(q.get('tamamla')){const p=plans.find(x=>x.id==q.get('tamamla'));if(p){setStatus(p,'done');save(p);toast('Tamamlandı')}h=true}
+ if(q.get('ertele')){const p=plans.find(x=>x.id==q.get('ertele'));if(p){const t=new Date(Date.now()+36e5);p.day=ymd(t);p.time=p2(t.getHours())+':'+p2(t.getMinutes());save(p);toast('1 saat ertelendi')}h=true}
+ if(q.get('ac')=='roll'){roll(TODAY());h=true}if(q.get('ac')=='rv'){V={l:'week',d:new Date()};render();review();h=true}
+ if(h)history.replaceState(null,'',location.pathname)}
+const _l3=load;load=async function(){await _l3();handleAct()};
+document.addEventListener('click',e=>{const t=e.target;let x;
+ if(SELM&&(x=t.closest('.pc'))&&!t.closest('[data-st],[data-nx]')){e.stopImmediatePropagation();const id=x.dataset.id;SEL.has(id)?SEL.delete(id):SEL.add(id);x.classList.toggle('sel');selBar();return}
+ if(x=t.closest('[data-fl]')){e.stopImmediatePropagation();FLT=x.dataset.fl;localStorage.setItem('flt',FLT);render()}
+ else if(x=t.closest('[data-sm]')){e.stopImmediatePropagation();SELM=!SELM;SEL.clear();render()}
+ else if(x=t.closest('[data-sa]')){e.stopImmediatePropagation();selAct(x.dataset.sa)}
+ else if(x=t.closest('[data-hb]')){e.stopImmediatePropagation();const p=plans.find(y=>y.id==x.dataset.hb),ds=ymd(V.d),L=(p.props||{}).log||[];p.props={...p.props,log:L.includes(ds)?L.filter(d=>d!=ds):[...L,ds]};save(p)}
+ else if(x=t.closest('[data-top]')){e.stopImmediatePropagation();const id=x.dataset.top,ch=plans.filter(p=>p.day===TODAY()&&p.top&&p.id!=id);ch.forEach(p=>p.top=false);const p=plans.find(y=>y.id==id);p.top=true;cache();close();render();sb.from('plans').upsert([p,...ch]).then(r=>r.error&&offq([p,...ch],r.error))}
+ else if(x=t.closest('[data-fm]')){e.stopImmediatePropagation();focusMode(x.dataset.fm)}
+ else if(x=t.closest('[data-fo]')){e.stopImmediatePropagation();const p=plans.find(y=>y.id==FID);if(x.dataset.fo=='done'&&p){setStatus(p,'done');save(p)}endFocus()}
+ else if(x=t.closest('[data-pf]')){e.stopImmediatePropagation();PF[x.dataset.pf]=!PF[x.dataset.pf];savePF();notifSheet(true)}
+ else if(x=t.closest('[data-fs]')){e.stopImmediatePropagation();localStorage.setItem('fm',x.dataset.fs);applyLook();lookSheet()}
+ else if(x=t.closest('[data-cb]')){e.stopImmediatePropagation();localStorage.setItem('cb',x.dataset.cb);applyLook();lookSheet()}
+ else if(x=t.closest('[data-sn]')){e.stopImmediatePropagation();localStorage.setItem('snow',x.dataset.sn);applyLook();lookSheet()}},true);
+const _p7=pact;
+pact=async function(a,i){
+ if(a=='nfs')notifSheet();else if(a=='icsin')$('#icsf').click();else if(a=='top')topSheet();else if(a=='sug')sugSheet();
+ else if(a=='cap'){const v=prompt('Haftalık kapasite (saat)?',localStorage.getItem('cap')||30);if(v&&+v>0){localStorage.setItem('cap',+v);render()}}
+ else if(a=='sy'){const y=V.d.getFullYear();summary(y+'-01-01',y+'-12-31',y+' yıl özeti')}
+ else return _p7(a,i)};
+
+/* ===== genel çevrimdışı, doğum günleri, katmanlar, hedefe bağlı planlar, paylaşım ===== */
+addEventListener('offq',()=>toast('Çevrimdışı: değişiklik bağlanınca gönderilecek'));
+addEventListener('offdone',e=>{toast(e.detail.ok+' değişiklik gönderildi'+(e.detail.bad?', '+e.detail.bad+' gönderilemedi':''));load()});
+ICON.bday='🎂';NAME.bday='Doğum günü';ICON.anniv='💞';NAME.anniv='Yıldönümü';['day','week','month','year'].forEach(k=>ORDER[k].push('bday','anniv'));
+const annual=(a,b)=>{const out=[];plans.filter(p=>(p.kind=='bday'||p.kind=='anniv')&&p.day).forEach(p=>{for(let y=+a.slice(0,4);y<=+b.slice(0,4);y++){const ds=`${y}-${p.day.slice(5)}`;if(ds>=a&&ds<=b)out.push({p,ds,n:y-+p.day.slice(0,4)})}});return out.sort((x,y)=>x.ds<y.ds?-1:1)};
+const aChips=(a,b)=>{const l=annual(a,b);return l.length?`<div class="strip">${l.map(({p,ds,n})=>`<span class="chip" style="background:#d9528f30;color:#d9528f" data-id="${p.id}">${p.kind=='bday'?'🎂':'💞'} ${esc(p.title)}${n>0?' · '+n+(p.kind=='bday'?' yaş':'. yıl'):''} · ${fmtD(ds)}</span>`).join('')}</div>`:''};
+const _vy5=vYear,_vm5=vMonth,_vw5=vWeek,_vd5=vDay;
+vYear=function(){const y=V.d.getFullYear();return _vy5().replace('</h1>','</h1>'+aChips(y+'-01-01',y+'-12-31'))};
+vMonth=function(){const y=V.d.getFullYear(),m=V.d.getMonth();return _vm5().replace('</h1>','</h1>'+aChips(`${y}-${p2(m+1)}-01`,`${y}-${p2(m+1)}-31`))};
+vWeek=function(){const s=mon(V.d);return _vw5().replace('</h1>','</h1>'+aChips(ymd(s),ymd(add(s,6)))+'<div class="strip"><span class="chip" data-pa="wcard">Haftayı kart olarak paylaş</span></div>')};
+vDay=function(){const ds=ymd(V.d);return _vd5().replace('<div class="strip">',aChips(ds,ds)+'<div class="strip">')};
+const HID=new Set(JSON.parse(localStorage.getItem('hid')||'[]'));
+function laySheet(){sheet(`<h2>Katmanlar</h2><p class="hint">Gizlediğin alanların planları hafta ve bugün sayfalarında görünmez.</p><div class="strip">${[...AREAS,''].map(a=>`<span class="chip${HID.has(a)?'':' on'}" data-hy="${a}">${a||'Alansız'}</span>`).join('')}</div>`)}
+const gp=g=>{const l=(g.body||'').split('\n').filter(Boolean),k=plans.filter(x=>x.goal_id==g.id&&isCard(x));return {n:l.filter(x=>x[1]=='x').length+k.filter(x=>x.done).length,t:l.length+k.length,s:l.length,k:k.length}};
+const goalSel=p=>{const g=plans.filter(x=>x.kind=='goal');return g.length?`<select id="egl"><option value="">Hedefe bağlı değil</option>${g.map(x=>`<option value="${x.id}"${p.goal_id==x.id?' selected':''}>🎯 ${esc(x.title)}</option>`).join('')}</select>`:''};
+const linkedHtml=g=>{const a=plans.filter(x=>x.goal_id==g.id&&isCard(x));return a.length?`<h2>Bağlı planlar</h2><div class="card">${a.map(x=>`<div class="p${x.done?' done':''}"><div class="tt">${esc(x.title)}<small>${x.day?fmtD(x.day):'Havuz'}</small></div></div>`).join('')}</div>`:''};
+function weekCard(){const s=mon(V.d),e=add(s,6),c=document.createElement('canvas');c.width=1080;c.height=1350;const x=c.getContext('2d'),col=getComputedStyle(document.documentElement).getPropertyValue('--ac').trim()||'#2f7de1',ft=z=>z+'px -apple-system,Segoe UI,sans-serif';
+ x.fillStyle='#f6f6f9';x.fillRect(0,0,1080,1350);x.fillStyle=col;x.fillRect(0,0,1080,230);x.fillStyle='#fff';x.font='600 '+ft(64);x.fillText(`${s.getDate()} ${AY[s.getMonth()]} haftası`,60,120);x.font=ft(34);x.fillText(`${s.getDate()} ${AY[s.getMonth()].slice(0,3)} – ${e.getDate()} ${AY[e.getMonth()].slice(0,3)}`,60,180);
+ for(let i=0;i<7;i++){const d=add(s,i),a=plans.filter(p=>p.day===ymd(d)&&isCard(p)).sort(by).slice(0,4),y=260+i*148;x.fillStyle='#fff';x.fillRect(40,y,1000,132);x.fillStyle=col;x.font='600 '+ft(36);x.fillText(GN[d.getDay()].slice(0,3)+' '+d.getDate(),64,y+52);
+  x.fillStyle='#222';x.font=ft(30);const t=a.map(p=>(p.time?p.time+' ':'')+p.title).join('  ·  ')||'Boş gün';x.fillText(t.length>46?t.slice(0,45)+'…':t,64,y+100)}
+ c.toBlob(b=>{const f=new File([b],'hafta.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:'Haftam'}).catch(()=>{});else{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='hafta.png';a.click()}})}
+function tplSheet(){sheet(`<h2>Şablonlarım</h2><div class="card">${TPLS.map(t=>`<div class="p"><div class="tt">${esc(t.name)}<small>${t.kind=='routine'?'Rutin':'Plan şablonu'} · ${t.tasks.length} madde</small></div><button data-ts="${t.id}">Paylaş</button><button data-td="${t.id}">Sil</button></div>`).join('')||'<div class="row"><small>Henüz şablon yok</small></div>'}</div>`)}
+const SBL=new URLSearchParams(location.search).get('sablon');if(SBL){localStorage.setItem('sbl',SBL);history.replaceState(null,'',location.pathname)}
+let INC=null;
+async function tplIncoming(){const id=localStorage.getItem('sbl');if(!id)return;localStorage.removeItem('sbl');const r=await sb.rpc('shared_template',{tid:id});if(!r.data||!r.data[0])return alert('Şablon bulunamadı.');INC=r.data[0];
+ sheet(`<h2>Şablon: ${esc(INC.name)}</h2><div class="card">${INC.tasks.slice(0,10).map(x=>`<div class="p"><div class="tt">${esc(x)}</div></div>`).join('')}</div><button class="big" data-pa="tpa">Şablonlarıma ekle</button>`)}
+const _l4=load;load=async function(){await _l4();tplIncoming()};
+document.addEventListener('click',e=>{const t=e.target;let x;
+ if(x=t.closest('[data-hy]')){e.stopImmediatePropagation();const a=x.dataset.hy;HID.has(a)?HID.delete(a):HID.add(a);localStorage.setItem('hid',JSON.stringify([...HID]));render();laySheet()}
+ else if(x=t.closest('[data-ts]')){e.stopImmediatePropagation();const tp=TPLS.find(y=>y.id==x.dataset.ts),u=`${location.origin}${location.pathname}?sablon=${tp.id}`;navigator.share?navigator.share({title:tp.name,text:tp.name+' şablonu',url:u}).catch(()=>{}):navigator.clipboard.writeText(u).then(()=>toast('Bağlantı kopyalandı'))}
+ else if(x=t.closest('[data-td]')){e.stopImmediatePropagation();const id=x.dataset.td;TPLS=TPLS.filter(y=>y.id!=id);sb.from('templates').delete().eq('id',id).then(err);tplSheet()}},true);
+const _p8=pact;
+pact=async function(a,i){
+ if(a=='lay')laySheet();else if(a=='wcard')weekCard();else if(a=='tpl')tplSheet();
+ else if(a=='tpa'&&INC){const n={id:crypto.randomUUID(),name:INC.name,tasks:INC.tasks,kind:INC.kind};TPLS.push(n);sb.from('templates').insert(n).then(err);close();toast('Şablon eklendi')}
+ else return _p8(a,i)};
+
+/* ===== kartı kaydırarak yarına at / tamamla ===== */
+function swStart(){DG.c.style.transition='none'}
+function swMove(dx){const c=DG.c,thr=Math.min(100,c.offsetWidth*.35);c.style.transform=`translateX(${dx}px)`;const k=dx>thr?'r':dx<-thr?'l':'';
+ if(k!==(c.dataset.sw||'')){if(k){if(navigator.vibrate)navigator.vibrate(12);c.dataset.sw=k;c.dataset.lb=k=='r'?'Yarına →':(c.classList.contains('done')?'← Geri al':'← Tamamla')}else{delete c.dataset.sw;delete c.dataset.lb}}}
+function swEnd(dx,cancel){const c=DG.c,id=c.dataset.id,k=c.dataset.sw;DG=null;
+ const kill=ev=>{ev.stopImmediatePropagation();ev.preventDefault();removeEventListener('click',kill,true)};addEventListener('click',kill,true);setTimeout(()=>removeEventListener('click',kill,true),400);
+ c.style.transition='transform .22s ease,opacity .22s';
+ if(cancel||!k){c.style.transform='';delete c.dataset.sw;delete c.dataset.lb;return}
+ localStorage.setItem('swh','1');c.style.transform=`translateX(${k=='r'?'110%':'-110%'})`;c.style.opacity='0';
+ setTimeout(()=>{k=='r'?nxt(id):swDone(id)},180)}
+function swDone(id){const p=plans.find(x=>x.id==id);if(!p)return;pushUndo();LM=id;setStatus(p,p.done?'todo':'done');save(p)}
+const _vw6=vWeek,_vd6=vDay;
+vWeek=function(){const s=mon(V.d);return _vw6().replace('<div class="wk7">',`${COARSE&&!localStorage.getItem('swh')?'<p class="hint">Kartı sağa kaydır: yarına at · sola kaydır: tamamla</p>':''}<div class="strip dp">${Array.from({length:7},(_,i)=>{const d=add(s,i);return `<span class="chip${ymd(d)===TODAY()?' on':''}" data-sc="${i}">${GN[d.getDay()].slice(0,3)} ${d.getDate()}</span>`}).join('')}</div><div class="wk7">`)};
+vDay=function(){const h=_vd6(),n=[...h.matchAll(/<div class="ln-w[^"]*"><h3>([^<]*)/g)].map(m=>m[1]);
+ return n.length?h.replace('<div class="lanes">','<div class="strip dp">'+n.map((x,i)=>`<span class="chip" data-sc="${i}">${x}</span>`).join('')+'</div><div class="lanes">'):h};
+document.addEventListener('click',e=>{const x=e.target.closest('[data-sc]');if(!x)return;e.stopImmediatePropagation();const w=document.querySelector('.wk7,.lanes'),k=w&&w.children[+x.dataset.sc];if(k)w.scrollTo({left:k.offsetLeft-(w.clientWidth-k.clientWidth)/2,behavior:'smooth'})},true);
